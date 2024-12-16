@@ -5,7 +5,7 @@ package com.pawmodoro.users.login;
  * Includes the formatted response to be sent back to the client.
  */
 public class InvalidLoginException extends RuntimeException {
-    private final LoginResponseDTO response;
+    private final transient LoginResponseDTO response;
 
     public InvalidLoginException(String message, LoginResponseDTO response) {
         super(message);
