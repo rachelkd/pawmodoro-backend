@@ -6,8 +6,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import jakarta.validation.Valid;
-import org.springframework.validation.BindingResult;
-import org.springframework.http.HttpStatus;
 
 /**
  * Controller handling user login requests.
@@ -18,16 +16,13 @@ import org.springframework.http.HttpStatus;
 @RequestMapping("/api/users/login")
 public class LoginController {
     private final LoginInputBoundary loginInteractor;
-    private final LoginPresenter loginPresenter;
 
     /**
      * Constructs a LoginController with required dependencies.
      * @param loginInteractor the use case interactor for login operations
-     * @param loginPresenter the presenter for formatting responses
      */
-    public LoginController(LoginInputBoundary loginInteractor, LoginPresenter loginPresenter) {
+    public LoginController(LoginInputBoundary loginInteractor) {
         this.loginInteractor = loginInteractor;
-        this.loginPresenter = loginPresenter;
     }
 
     /**
@@ -35,38 +30,17 @@ public class LoginController {
      * Validates the request, converts it into a domain-specific input data object,
      * processes it through the use case interactor, and returns the formatted response.
      * @param request the login request containing username and password
-     * @param bindingResult contains the validation results
-     * @return ResponseEntity containing the login response or error details
+     * @return ResponseEntity containing the login response
      */
     @PostMapping
     public ResponseEntity<LoginResponseDTO> login(
         @Valid
         @RequestBody
-        LoginRequestDTO request,
-        BindingResult bindingResult) {
+        LoginRequestDTO request) {
 
-        // Handle validation errors
-        if (bindingResult.hasErrors()) {
-            String errorMessage = bindingResult.getFieldErrors()
-                .stream()
-                .map(error -> error.getDefaultMessage())
-                .findFirst()
-                .orElse("Invalid request");
+        LoginInputData inputData = new LoginInputData(request.username(), request.password());
+        LoginResponseDTO responseDTO = loginInteractor.execute(inputData);
+        return ResponseEntity.ok(responseDTO);
 
-            return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(loginPresenter.formatErrorResponse(errorMessage));
-        }
-
-        try {
-            LoginInputData inputData = new LoginInputData(request.username(), request.password());
-            LoginResponseDTO responseDTO = loginInteractor.execute(inputData);
-            return ResponseEntity.ok(responseDTO);
-        }
-        catch (InvalidLoginException exception) {
-            return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(exception.getResponse());
-        }
     }
 }
