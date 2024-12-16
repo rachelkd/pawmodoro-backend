@@ -1,8 +1,11 @@
 package com.pawmodoro.users;
 
+import org.springframework.stereotype.Component;
+
 /**
  * Factory for creating CommonUser objects.
  */
+@Component
 public class CommonUserFactory implements UserFactory {
 
     @Override

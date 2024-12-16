@@ -91,8 +91,8 @@ public class LoginInteractor implements LoginInputBoundary {
         }
         catch (DatabaseAccessException exception) {
             LoginResponseDTO errorResponse = loginPresenter.formatErrorResponse(
-                "Authentication failed");
-            throw new InvalidLoginException("Authentication failed", errorResponse);
+                exception.getMessage());
+            throw new InvalidLoginException("Database access error", errorResponse);
         }
     }
 }

@@ -49,7 +49,7 @@ public class LoginController {
         if (bindingResult.hasErrors()) {
             String errorMessage = bindingResult.getFieldErrors()
                 .stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .map(error -> error.getDefaultMessage())
                 .findFirst()
                 .orElse("Invalid request");
 
@@ -65,7 +65,7 @@ public class LoginController {
         }
         catch (InvalidLoginException exception) {
             return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
+                .status(HttpStatus.BAD_REQUEST)
                 .body(exception.getResponse());
         }
     }
