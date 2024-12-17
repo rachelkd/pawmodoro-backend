@@ -27,30 +27,22 @@ public class LoginInteractor implements LoginInputBoundary {
     }
 
     @Override
-    public LoginResponseDTO execute(LoginInputData loginInputData) {
-        try {
-            validateInput(loginInputData);
+    public LoginResponseDTO execute(LoginInputData loginInputData)
+        throws DatabaseAccessException, UserNotFoundException {
+        validateInput(loginInputData);
 
-            // Get user by username to get their email
-            User user = userDataAccessObject.get(loginInputData.username());
+        // Get user by username to get their email
+        User user = userDataAccessObject.get(loginInputData.username());
 
-            // Authenticate with Supabase using email and password
-            User authenticatedUser = userDataAccessObject.authenticate(
-                user.getEmail(),
-                loginInputData.password());
+        // Authenticate with Supabase using email and password
+        User authenticatedUser = userDataAccessObject.authenticate(
+            user.getEmail(),
+            loginInputData.password());
 
-            // Get the access token from the successful authentication
-            String token = userDataAccessObject.getAccessToken();
+        // Get the access token from the successful authentication
+        String token = userDataAccessObject.getAccessToken();
 
-            return prepareSuccessResponse(authenticatedUser.getName(), token);
-
-        }
-        catch (UserNotFoundException e) {
-            throw new InvalidLoginException("Invalid username or password");
-        }
-        catch (DatabaseAccessException e) {
-            throw new InvalidLoginException("Error during login: " + e.getMessage());
-        }
+        return prepareSuccessResponse(authenticatedUser.getName(), token);
     }
 
     /**

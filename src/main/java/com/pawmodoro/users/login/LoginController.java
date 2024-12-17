@@ -1,6 +1,11 @@
 package com.pawmodoro.users.login;
 
 import org.springframework.web.bind.annotation.RestController;
+
+import com.pawmodoro.users.UserNotFoundException;
+
+import entity.exceptions.DatabaseAccessException;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,7 +41,7 @@ public class LoginController {
     public ResponseEntity<LoginResponseDTO> login(
         @Valid
         @RequestBody
-        LoginRequestDTO request) {
+        LoginRequestDTO request) throws UserNotFoundException, DatabaseAccessException {
 
         LoginInputData inputData = new LoginInputData(request.username(), request.password());
         LoginResponseDTO responseDTO = loginInteractor.execute(inputData);

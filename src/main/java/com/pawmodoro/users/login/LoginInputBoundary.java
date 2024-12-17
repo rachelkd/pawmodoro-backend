@@ -1,5 +1,8 @@
 package com.pawmodoro.users.login;
 
+import entity.exceptions.DatabaseAccessException;
+import com.pawmodoro.users.UserNotFoundException;
+
 /**
  * Input boundary for the login use case.
  * This interface defines the contract for executing the login operation
@@ -12,7 +15,10 @@ public interface LoginInputBoundary {
      * and calling the presenter to format the response.
      * @param loginInputData the input data containing login credentials
      * @return LoginResponseDTO the formatted response ready to be sent to the client
-     * @throws InvalidLoginException if login credentials are invalid, containing the formatted error response
+     * @throws InvalidLoginException if login validation fails
+     * @throws UserNotFoundException if the user is not found
+     * @throws DatabaseAccessException if there is a database error
      */
-    LoginResponseDTO execute(LoginInputData loginInputData) throws InvalidLoginException;
+    LoginResponseDTO execute(LoginInputData loginInputData)
+        throws UserNotFoundException, DatabaseAccessException;
 }

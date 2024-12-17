@@ -1,10 +1,14 @@
 package com.pawmodoro.users.login;
 
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.http.HttpStatus;
+
 /**
  * Exception thrown when login validation fails.
  * This is a runtime exception as it represents a validation error that should be handled
  * at the application level rather than requiring explicit exception handling.
  */
+@ResponseStatus(HttpStatus.UNAUTHORIZED)
 public class InvalidLoginException extends RuntimeException {
     private final transient LoginResponseDTO response;
 
