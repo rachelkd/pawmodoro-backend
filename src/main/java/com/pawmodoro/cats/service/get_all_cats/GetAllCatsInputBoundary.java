@@ -1,5 +1,6 @@
 package com.pawmodoro.cats.service.get_all_cats;
 
+import com.pawmodoro.cats.entity.CatAuthenticationException;
 import com.pawmodoro.cats.service.get_all_cats.interface_adapter.GetAllCatsResponseDTO;
 import com.pawmodoro.core.DatabaseAccessException;
 
@@ -13,6 +14,8 @@ public interface GetAllCatsInputBoundary {
      * @param getAllCatsInputData input data containing the owner's username
      * @return GetAllCatsResponseDTO containing the formatted response
      * @throws DatabaseAccessException if there is an error accessing the database
+     * @throws CatAuthenticationException if the authentication fails
      */
-    GetAllCatsResponseDTO execute(GetAllCatsInputData getAllCatsInputData) throws DatabaseAccessException;
+    GetAllCatsResponseDTO execute(GetAllCatsInputData getAllCatsInputData)
+        throws DatabaseAccessException, CatAuthenticationException;
 }

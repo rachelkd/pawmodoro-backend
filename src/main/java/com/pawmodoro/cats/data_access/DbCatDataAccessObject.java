@@ -12,6 +12,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.pawmodoro.cats.entity.Cat;
+import com.pawmodoro.cats.entity.CatAuthenticationException;
 import com.pawmodoro.cats.entity.CatFactory;
 import com.pawmodoro.cats.entity.NoCatsFoundException;
 import com.pawmodoro.cats.service.get_all_cats.GetAllCatsDataAccessInterface;
@@ -69,14 +70,15 @@ public class DbCatDataAccessObject implements GetAllCatsDataAccessInterface {
     }
 
     @Override
-    public Collection<Cat> getCatsByOwner(String ownerUsername) throws DatabaseAccessException {
+    public Collection<Cat> getCatsByOwner(String ownerUsername)
+        throws DatabaseAccessException, CatAuthenticationException {
         // Get the authorization token from the current request
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
             .getRequest();
         String authToken = request.getHeader(AUTH_HEADER);
 
         if (authToken == null || !authToken.startsWith(BEARER_PREFIX)) {
-            throw new DatabaseAccessException("Authorization token is required");
+            throw new CatAuthenticationException("Authorization token is required");
         }
 
         final Collection<Cat> cats = new ArrayList<>();
@@ -91,7 +93,14 @@ public class DbCatDataAccessObject implements GetAllCatsDataAccessInterface {
             final Response response = client.newCall(supabaseRequest).execute();
             final String responseBody = response.body().string();
 
-            if (response.isSuccessful() && !responseBody.equals(EMPTY_JSON_ARRAY)) {
+            if (!response.isSuccessful()) {
+                if (response.code() == 401) {
+                    throw new CatAuthenticationException("Invalid authorization token");
+                }
+                throw new DatabaseAccessException("Failed to retrieve cats: " + response.message());
+            }
+
+            if (!responseBody.equals(EMPTY_JSON_ARRAY)) {
                 final JSONArray jsonArray = new JSONArray(responseBody);
                 for (int i = 0; i < jsonArray.length(); i++) {
                     final JSONObject catJson = jsonArray.getJSONObject(i);
