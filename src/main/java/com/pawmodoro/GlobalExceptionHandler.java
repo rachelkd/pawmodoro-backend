@@ -1,9 +1,13 @@
-package com.pawmodoro.exception;
+package com.pawmodoro;
 
 import com.pawmodoro.users.UserNotFoundException;
 import com.pawmodoro.users.login.InvalidLoginException;
 import com.pawmodoro.users.login.LoginPresenter;
 import com.pawmodoro.users.login.LoginResponseDTO;
+import com.pawmodoro.users.signup.InvalidSignupException;
+import com.pawmodoro.users.signup.SignupResponseDTO;
+import com.pawmodoro.users.login.LoginOutputData;
+
 import entity.exceptions.DatabaseAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -67,7 +71,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<LoginResponseDTO> handleUserNotFoundException(UserNotFoundException exception) {
         return ResponseEntity
             .status(HttpStatus.NOT_FOUND)
-            .body(loginPresenter.formatErrorResponse(exception.getMessage()));
+            .body(loginPresenter.prepareResponse(new LoginOutputData(exception.getMessage())));
     }
 
     /**
@@ -80,7 +84,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<LoginResponseDTO> handleDatabaseAccessException(DatabaseAccessException exception) {
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(loginPresenter.formatErrorResponse("An internal error occurred. Please try again later."));
+            .body(loginPresenter.prepareResponse(
+                new LoginOutputData("An internal error occurred. Please try again later.")));
+    }
+
+    /**
+     * Handles invalid signup exceptions.
+     * @param exception the invalid signup exception
+     * @return response entity with error details
+     */
+    @ExceptionHandler(InvalidSignupException.class)
+    public ResponseEntity<SignupResponseDTO> handleInvalidSignup(InvalidSignupException exception) {
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(exception.getResponse());
     }
 
     /**
@@ -93,6 +110,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<LoginResponseDTO> handleUnexpectedException(Exception exception) {
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(loginPresenter.formatErrorResponse("An unexpected error occurred. Please try again later."));
+            .body(loginPresenter.prepareResponse(
+                new LoginOutputData("An unexpected error occurred. Please try again later.")));
     }
 }

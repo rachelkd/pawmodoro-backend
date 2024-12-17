@@ -1,13 +1,13 @@
 package com.pawmodoro.users.login;
 
+import org.springframework.stereotype.Service;
+import entity.exceptions.DatabaseAccessException;
 import com.pawmodoro.users.User;
 import com.pawmodoro.users.UserNotFoundException;
-import entity.exceptions.DatabaseAccessException;
-import org.springframework.stereotype.Service;
 
 /**
- * The Login Interactor that implements the login use case.
- * This class contains the business logic for user authentication.
+ * The Login Interactor implements the business logic for user authentication.
+ * This class follows the Single Responsibility Principle by handling only login-related logic.
  */
 @Service
 public class LoginInteractor implements LoginInputBoundary {
@@ -16,83 +16,60 @@ public class LoginInteractor implements LoginInputBoundary {
 
     /**
      * Constructs a LoginInteractor with required dependencies.
-     * @param userDataAccessInterface data access interface for user operations
-     * @param loginOutputBoundary presenter for formatting responses
+     * @param userDataAccessObject data access object for user operations
+     * @param loginPresenter presenter for formatting responses
      */
-    public LoginInteractor(LoginUserDataAccessInterface userDataAccessInterface,
-        LoginOutputBoundary loginOutputBoundary) {
-        this.userDataAccessObject = userDataAccessInterface;
-        this.loginPresenter = loginOutputBoundary;
+    public LoginInteractor(
+        LoginUserDataAccessInterface userDataAccessObject,
+        LoginOutputBoundary loginPresenter) {
+        this.userDataAccessObject = userDataAccessObject;
+        this.loginPresenter = loginPresenter;
     }
 
     @Override
-    public LoginResponseDTO execute(LoginInputData loginInputData) throws InvalidLoginException {
+    public LoginResponseDTO execute(LoginInputData loginInputData) {
         try {
-            // First check if the user exists
-            if (!userDataAccessObject.existsByName(loginInputData.username())) {
-                LoginResponseDTO errorResponse = loginPresenter.formatErrorResponse(
-                    "User does not exist.");
-                throw new InvalidLoginException("User not found", errorResponse);
-            }
+            validateInput(loginInputData);
 
-            return authenticateUser(loginInputData.username(), loginInputData.password());
+            // Get user by username to get their email
+            User user = userDataAccessObject.get(loginInputData.username());
+
+            // Authenticate with Supabase using email and password
+            User authenticatedUser = userDataAccessObject.authenticate(
+                user.getEmail(),
+                loginInputData.password());
+
+            // Get the access token from the successful authentication
+            String token = userDataAccessObject.getAccessToken();
+
+            return prepareSuccessResponse(authenticatedUser.getName(), token);
+
         }
-        catch (DatabaseAccessException exception) {
-            LoginResponseDTO errorResponse = loginPresenter.formatErrorResponse(
-                exception.getMessage());
-            throw new InvalidLoginException("Authentication failed", errorResponse);
+        catch (UserNotFoundException e) {
+            throw new InvalidLoginException("Invalid username or password");
+        }
+        catch (DatabaseAccessException e) {
+            throw new InvalidLoginException("Error during login: " + e.getMessage());
         }
     }
 
     /**
-     * Authenticates a user with the given credentials.
-     * @param username the username to authenticate
-     * @param password the password to authenticate with
-     * @return formatted login response DTO
-     * @throws DatabaseAccessException if there is an error accessing the database
-     * @throws UserNotFoundException if the user is not found
-     * @throws InvalidLoginException if the credentials are invalid
+     * Prepares a success response with the authenticated user's information.
+     * @param username the authenticated username
+     * @param token the authentication token
+     * @return formatted login response
      */
-    private LoginResponseDTO authenticateUser(String username, String password) throws InvalidLoginException {
-        User user;
-        // Get the user by username to get their email
-        try {
-            user = userDataAccessObject.get(username);
-        }
-        catch (UserNotFoundException exception) {
-            LoginResponseDTO errorResponse = loginPresenter.formatErrorResponse(
-                exception.getMessage());
-            throw new InvalidLoginException("User not found", errorResponse);
-        }
-        catch (DatabaseAccessException exception) {
-            LoginResponseDTO errorResponse = loginPresenter.formatErrorResponse(
-                exception.getMessage());
-            throw new InvalidLoginException("Database access error", errorResponse);
-        }
+    private LoginResponseDTO prepareSuccessResponse(String username, String token) {
+        return loginPresenter.prepareResponse(
+            new LoginOutputData(username, token));
+    }
 
-        try {
-            // Attempt to authenticate with Supabase using email and password
-            // This will also store the access token in the DAO
-            User authenticatedUser = userDataAccessObject.authenticate(user.getEmail(), password);
-
-            // Create output data with user info and the access token from Supabase
-            LoginOutputData outputData = new LoginOutputData(
-                authenticatedUser.getName(),
-                userDataAccessObject.getAccessToken());
-
-            // Format success response using presenter
-            return loginPresenter.formatSuccessResponse(outputData);
+    private void validateInput(LoginInputData data) {
+        if (data.username() == null || data.username().trim().isEmpty()) {
+            throw new InvalidLoginException("Username is required");
         }
-        catch (UserNotFoundException authException) {
-            // Handle authentication failure (wrong password)
-            LoginResponseDTO errorResponse = loginPresenter.formatErrorResponse(
-                authException.getMessage());
-            throw new InvalidLoginException("Invalid credentials", errorResponse);
-        }
-        catch (DatabaseAccessException exception) {
-            LoginResponseDTO errorResponse = loginPresenter.formatErrorResponse(
-                exception.getMessage());
-            throw new InvalidLoginException("Database access error", errorResponse);
+        if (data.password() == null || data.password().trim().isEmpty()) {
+            throw new InvalidLoginException("Password is required");
         }
     }
 }

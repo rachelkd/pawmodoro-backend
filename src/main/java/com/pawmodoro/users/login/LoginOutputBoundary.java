@@ -1,20 +1,16 @@
 package com.pawmodoro.users.login;
 
 /**
- * Presenter interface for formatting login responses.
+ * Output boundary for formatting login responses.
+ * This interface defines how the use case output should be formatted into responses.
+ * Consistently uses LoginOutputData for both success and error cases to maintain
+ * clean separation between use case and presentation layers.
  */
 public interface LoginOutputBoundary {
     /**
-     * Formats a successful login response.
+     * Formats a login response, whether successful or not.
      * @param outputData the output data from the login use case
      * @return formatted login response DTO
      */
-    LoginResponseDTO formatSuccessResponse(LoginOutputData outputData);
-
-    /**
-     * Formats a failed login response.
-     * @param error the error message describing why login failed
-     * @return formatted login response DTO with error details
-     */
-    LoginResponseDTO formatErrorResponse(String error);
+    LoginResponseDTO prepareResponse(LoginOutputData outputData);
 }

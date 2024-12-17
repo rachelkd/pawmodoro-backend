@@ -10,20 +10,20 @@ import org.springframework.stereotype.Component;
 public class LoginPresenter implements LoginOutputBoundary {
 
     @Override
-    public LoginResponseDTO formatSuccessResponse(LoginOutputData outputData) {
-        return new LoginResponseDTO(
-            true,
-            outputData.token(),
-            "Login successful",
-            outputData.username());
-    }
-
-    @Override
-    public LoginResponseDTO formatErrorResponse(String error) {
-        return new LoginResponseDTO(
-            false,
-            null,
-            error,
-            null);
+    public LoginResponseDTO prepareResponse(LoginOutputData outputData) {
+        if (outputData.isSuccess()) {
+            return new LoginResponseDTO(
+                true,
+                outputData.getToken(),
+                "Login successful",
+                outputData.getUsername());
+        }
+        else {
+            return new LoginResponseDTO(
+                false,
+                null,
+                outputData.getError(),
+                null);
+        }
     }
 }
