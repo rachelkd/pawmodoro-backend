@@ -1,8 +1,7 @@
-package com.pawmodoro.cats;
-
-import java.util.Collection;
+package com.pawmodoro.cats.data_access;
 
 import com.pawmodoro.cats.entity.Cat;
+import com.pawmodoro.cats.entity.NoCatsFoundException;
 
 /**
  * Interface for accessing cat data in the data store.
@@ -24,13 +23,6 @@ public interface CatDataAccessInterface {
      * @return the cat if found, null otherwise
      */
     Cat getCatByNameAndOwner(String name, String ownerUsername);
-
-    /**
-     * Retrieves all cats owned by a specific user.
-     * @param ownerUsername the username of the owner
-     * @return collection of cats owned by the user
-     */
-    Collection<Cat> getCatsByOwner(String ownerUsername);
 
     /**
      * Updates an existing cat's data.
@@ -67,7 +59,7 @@ public interface CatDataAccessInterface {
      * @param name the name of the cat
      * @param ownerUsername the username of the cat's owner
      * @return the hunger level of the cat
-     * @throws entity.exceptions.NoCatsFoundException if the cat is not found
+     * @throws NoCatsFoundException if the cat is not found
      */
     int getHungerLevel(String name, String ownerUsername);
 
@@ -76,7 +68,7 @@ public interface CatDataAccessInterface {
      * @param name the name of the cat
      * @param ownerUsername the username of the cat's owner
      * @return the happiness level of the cat
-     * @throws entity.exceptions.NoCatsFoundException if the cat is not found
+     * @throws NoCatsFoundException if the cat is not found
      */
     int getHappinessLevel(String name, String ownerUsername);
 }
