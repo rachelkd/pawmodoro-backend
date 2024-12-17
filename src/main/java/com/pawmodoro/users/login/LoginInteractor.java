@@ -34,15 +34,20 @@ public class LoginInteractor implements LoginInputBoundary {
         // Get user by username to get their email
         User user = userDataAccessObject.get(loginInputData.username());
 
-        // Authenticate with Supabase using email and password
-        User authenticatedUser = userDataAccessObject.authenticate(
-            user.getEmail(),
-            loginInputData.password());
+        try {
+            // Authenticate with Supabase using email and password
+            User authenticatedUser = userDataAccessObject.authenticate(
+                user.getEmail(),
+                loginInputData.password());
 
-        // Get the access token from the successful authentication
-        String token = userDataAccessObject.getAccessToken();
+            // Get the access token from the successful authentication
+            String token = userDataAccessObject.getAccessToken();
 
-        return prepareSuccessResponse(authenticatedUser.getName(), token);
+            return prepareSuccessResponse(authenticatedUser.getName(), token);
+        }
+        catch (UserNotFoundException exception) {
+            throw new InvalidLoginException("Wrong password");
+        }
     }
 
     /**

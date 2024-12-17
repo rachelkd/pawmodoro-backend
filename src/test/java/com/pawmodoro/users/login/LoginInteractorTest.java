@@ -84,9 +84,9 @@ class LoginInteractorTest {
             .thenThrow(new UserNotFoundException("Authentication failed"));
 
         // Act & Assert
-        UserNotFoundException exception = assertThrows(UserNotFoundException.class,
+        InvalidLoginException exception = assertThrows(InvalidLoginException.class,
             () -> loginInteractor.execute(inputData));
-        assertEquals("Authentication failed", exception.getMessage());
+        assertEquals("Wrong password", exception.getMessage());
     }
 
     @Test
