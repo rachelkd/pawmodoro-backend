@@ -132,7 +132,7 @@ public class DbUserDataAccessObject implements SignupUserDataAccessInterface,
             }
         }
         catch (DatabaseAccessException | IOException exception) {
-            throw new DatabaseAccessException("Failed to create user: " + exception.getMessage());
+            throw new DatabaseAccessException(exception.getMessage());
         }
     }
 

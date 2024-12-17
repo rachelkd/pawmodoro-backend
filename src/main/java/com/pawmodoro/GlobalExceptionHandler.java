@@ -2,22 +2,19 @@ package com.pawmodoro;
 
 import com.pawmodoro.users.UserNotFoundException;
 import com.pawmodoro.users.login.InvalidLoginException;
-import com.pawmodoro.users.login.LoginPresenter;
 import com.pawmodoro.users.login.LoginResponseDTO;
 import com.pawmodoro.users.signup.InvalidSignupException;
 import com.pawmodoro.users.signup.SignupResponseDTO;
-import com.pawmodoro.users.login.LoginOutputData;
 
 import entity.exceptions.DatabaseAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Global exception handler for the application.
@@ -27,25 +24,42 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private final LoginPresenter loginPresenter;
-
-    public GlobalExceptionHandler(LoginPresenter loginPresenter) {
-        this.loginPresenter = loginPresenter;
-    }
-
     /**
      * Handles validation errors from request body validation.
      * This occurs when @Valid validation fails on controller methods.
      * @param exception the validation exception
-     * @return map of field names to error messages
+     * @param request the web request
+     * @return response entity with validation error details
      */
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException exception) {
-        Map<String, String> errors = new HashMap<>();
-        exception.getBindingResult().getFieldErrors()
-            .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-        return errors;
+    public ResponseEntity<Object> handleValidationExceptions(
+        MethodArgumentNotValidException exception,
+        WebRequest request) {
+
+        String errorMessage = exception.getBindingResult()
+            .getFieldErrors()
+            .stream()
+            .map(error -> error.getDefaultMessage())
+            .collect(Collectors.joining(", "));
+
+        // Determine which DTO to use based on the request path
+        String path = request.getDescription(false);
+        Object errorResponse;
+
+        if (path.contains("/signup")) {
+            errorResponse = SignupResponseDTO.error(errorMessage);
+        }
+        else if (path.contains("/login")) {
+            errorResponse = new LoginResponseDTO(false, null, errorMessage, null);
+        }
+        else {
+            // Generic error response for unknown endpoints
+            errorResponse = new ErrorResponse(errorMessage);
+        }
+
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(errorResponse);
     }
 
     /**
@@ -71,21 +85,39 @@ public class GlobalExceptionHandler {
     public ResponseEntity<LoginResponseDTO> handleUserNotFoundException(UserNotFoundException exception) {
         return ResponseEntity
             .status(HttpStatus.NOT_FOUND)
-            .body(loginPresenter.prepareResponse(new LoginOutputData(exception.getMessage())));
+            .body(new LoginResponseDTO(false, null, exception.getMessage(), null));
     }
 
     /**
      * Handles database access errors.
      * This occurs when there are issues connecting to or querying the database.
      * @param exception the database access exception
+     * @param request the web request
      * @return response entity with error details
      */
     @ExceptionHandler(DatabaseAccessException.class)
-    public ResponseEntity<LoginResponseDTO> handleDatabaseAccessException(DatabaseAccessException exception) {
+    public ResponseEntity<Object> handleDatabaseAccessException(
+        DatabaseAccessException exception,
+        WebRequest request) {
+        String errorMessage = exception.getMessage();
+
+        // Determine which DTO to use based on the request path
+        String path = request.getDescription(false);
+        Object errorResponse;
+
+        if (path.contains("/signup")) {
+            errorResponse = SignupResponseDTO.error(errorMessage);
+        }
+        else if (path.contains("/login")) {
+            errorResponse = new LoginResponseDTO(false, null, errorMessage, null);
+        }
+        else {
+            errorResponse = new ErrorResponse(errorMessage);
+        }
+
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(loginPresenter.prepareResponse(
-                new LoginOutputData("An internal error occurred. Please try again later.")));
+            .body(errorResponse);
     }
 
     /**
@@ -104,13 +136,36 @@ public class GlobalExceptionHandler {
      * Handles all other unhandled exceptions.
      * This is a catch-all handler for any unexpected errors.
      * @param exception the unhandled exception
+     * @param request the web request
      * @return response entity with error details
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<LoginResponseDTO> handleUnexpectedException(Exception exception) {
+    public ResponseEntity<Object> handleUnexpectedException(
+        Exception exception,
+        WebRequest request) {
+        String errorMessage = "An unexpected error occurred. Please try again later.";
+
+        // Determine which DTO to use based on the request path
+        String path = request.getDescription(false);
+        Object errorResponse;
+
+        if (path.contains("/signup")) {
+            errorResponse = SignupResponseDTO.error(errorMessage);
+        }
+        else if (path.contains("/login")) {
+            errorResponse = new LoginResponseDTO(false, null, errorMessage, null);
+        }
+        else {
+            errorResponse = new ErrorResponse(errorMessage);
+        }
+
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(loginPresenter.prepareResponse(
-                new LoginOutputData("An unexpected error occurred. Please try again later.")));
+            .body(errorResponse);
     }
+
+    /**
+     * Generic error response for unknown endpoints.
+     */
+    private record ErrorResponse(String message) {}
 }

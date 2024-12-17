@@ -58,7 +58,7 @@ class LoginInteractorTest {
     }
 
     @Test
-    void execute_WithNonexistentUser_ThrowsException()
+    void execute_WithNonexistentUser_ThrowsUserNotFoundException()
         throws DatabaseAccessException, UserNotFoundException {
         // Arrange
         LoginInputData inputData = new LoginInputData("nonexistent", "password123");
@@ -67,13 +67,13 @@ class LoginInteractorTest {
             .thenThrow(new UserNotFoundException("User not found"));
 
         // Act & Assert
-        InvalidLoginException exception = assertThrows(InvalidLoginException.class,
+        UserNotFoundException exception = assertThrows(UserNotFoundException.class,
             () -> loginInteractor.execute(inputData));
-        assertEquals("Invalid username or password", exception.getMessage());
+        assertEquals("User not found", exception.getMessage());
     }
 
     @Test
-    void execute_WithIncorrectPassword_ThrowsException()
+    void execute_WithIncorrectPassword_ThrowsUserNotFoundException()
         throws DatabaseAccessException, UserNotFoundException {
         // Arrange
         LoginInputData inputData = new LoginInputData("testuser", "wrongpassword");
@@ -84,13 +84,13 @@ class LoginInteractorTest {
             .thenThrow(new UserNotFoundException("Authentication failed"));
 
         // Act & Assert
-        InvalidLoginException exception = assertThrows(InvalidLoginException.class,
+        UserNotFoundException exception = assertThrows(UserNotFoundException.class,
             () -> loginInteractor.execute(inputData));
-        assertEquals("Invalid username or password", exception.getMessage());
+        assertEquals("Authentication failed", exception.getMessage());
     }
 
     @Test
-    void execute_WithDatabaseError_ThrowsException()
+    void execute_WithDatabaseError_ThrowsDatabaseAccessException()
         throws DatabaseAccessException, UserNotFoundException {
         // Arrange
         LoginInputData inputData = new LoginInputData("testuser", "password123");
@@ -99,13 +99,13 @@ class LoginInteractorTest {
             .thenThrow(new DatabaseAccessException("Database error"));
 
         // Act & Assert
-        InvalidLoginException exception = assertThrows(InvalidLoginException.class,
+        DatabaseAccessException exception = assertThrows(DatabaseAccessException.class,
             () -> loginInteractor.execute(inputData));
-        assertEquals("Error during login: Database error", exception.getMessage());
+        assertEquals("Database error", exception.getMessage());
     }
 
     @Test
-    void execute_WithEmptyUsername_ThrowsException() {
+    void execute_WithEmptyUsername_ThrowsInvalidLoginException() {
         // Arrange
         LoginInputData inputData = new LoginInputData("", "password123");
 
@@ -116,7 +116,7 @@ class LoginInteractorTest {
     }
 
     @Test
-    void execute_WithEmptyPassword_ThrowsException() {
+    void execute_WithEmptyPassword_ThrowsInvalidLoginException() {
         // Arrange
         LoginInputData inputData = new LoginInputData("testuser", "");
 
