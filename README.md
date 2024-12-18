@@ -87,7 +87,6 @@ Content-Type: application/json
 ```http
 GET /api/cats/user/{username}
 Authorization: Bearer <token>
-apikey: <supabase-anon-key>
 ```
 
 **Responses:**
