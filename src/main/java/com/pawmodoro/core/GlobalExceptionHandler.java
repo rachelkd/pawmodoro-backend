@@ -1,6 +1,7 @@
 package com.pawmodoro.core;
 
 import com.pawmodoro.cats.entity.CatAuthenticationException;
+import com.pawmodoro.cats.service.get_all_cats.InvalidGetAllCatsException;
 import com.pawmodoro.users.entity.UserNotFoundException;
 import com.pawmodoro.users.service.login.InvalidLoginException;
 import com.pawmodoro.users.service.signup.InvalidSignupException;
@@ -55,8 +56,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(InvalidLoginException.class)
     public Map<String, String> handleInvalidLoginException(InvalidLoginException exception) {
-        return createErrorResponse(
-            exception.getMessage());
+        return createErrorResponse(exception.getMessage());
     }
 
     /**
@@ -67,8 +67,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(UserNotFoundException.class)
     public Map<String, String> handleUserNotFoundException(UserNotFoundException exception) {
-        return createErrorResponse(
-            exception.getMessage());
+        return createErrorResponse(exception.getMessage());
     }
 
     /**
@@ -79,8 +78,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(DatabaseAccessException.class)
     public Map<String, String> handleDatabaseAccessException(DatabaseAccessException exception) {
-        return createErrorResponse(
-            exception.getMessage());
+        return createErrorResponse(exception.getMessage());
     }
 
     /**
@@ -91,8 +89,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(InvalidSignupException.class)
     public Map<String, String> handleInvalidSignupException(InvalidSignupException exception) {
-        return createErrorResponse(
-            exception.getMessage());
+        return createErrorResponse(exception.getMessage());
     }
 
     /**
@@ -103,8 +100,18 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(CatAuthenticationException.class)
     public Map<String, String> handleCatAuthenticationException(CatAuthenticationException exception) {
-        return createErrorResponse(
-            exception.getMessage());
+        return createErrorResponse(exception.getMessage());
+    }
+
+    /**
+     * Handles invalid get all cats inputs.
+     * @param exception InvalidGetAllCatsException
+     * @return Map containing error details
+     */
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(InvalidGetAllCatsException.class)
+    public Map<String, String> handleInvalidGetAllCatsException(InvalidGetAllCatsException exception) {
+        return createErrorResponse(exception.getMessage());
     }
 
     /**
@@ -115,7 +122,6 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public Map<String, String> handleUnexpectedException(Exception exception) {
-        return createErrorResponse(
-            "An unexpected error occurred. Please try again later.");
+        return createErrorResponse("An unexpected error occurred. Please try again later.");
     }
 }
