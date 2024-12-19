@@ -1,13 +1,14 @@
 package com.pawmodoro.users.service.login.interface_adapter;
 
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.http.HttpStatus;
 
 import com.pawmodoro.core.DatabaseAccessException;
 import com.pawmodoro.users.entity.UserNotFoundException;
 import com.pawmodoro.users.service.login.LoginInputBoundary;
 import com.pawmodoro.users.service.login.LoginInputData;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,19 +35,20 @@ public class LoginController {
     /**
      * Handles POST requests for user login.
      * Validates the request, converts it into a domain-specific input data object,
-     * processes it through the use case interactor, and returns the formatted response.
+     * and processes it through the use case interactor.
      * @param request the login request containing username and password
-     * @return ResponseEntity containing the login response
+     * @return LoginResponseDTO containing the login response
+     * @throws UserNotFoundException if the user is not found
+     * @throws DatabaseAccessException if there's an error accessing the database
      */
-    @PostMapping
-    public ResponseEntity<LoginResponseDTO> login(
+    @PostMapping("")
+    @ResponseStatus(HttpStatus.OK)
+    public LoginResponseDTO login(
         @Valid
         @RequestBody
         LoginRequestDTO request) throws UserNotFoundException, DatabaseAccessException {
 
         LoginInputData inputData = new LoginInputData(request.username(), request.password());
-        LoginResponseDTO responseDTO = loginInteractor.execute(inputData);
-        return ResponseEntity.ok(responseDTO);
-
+        return loginInteractor.execute(inputData);
     }
 }
