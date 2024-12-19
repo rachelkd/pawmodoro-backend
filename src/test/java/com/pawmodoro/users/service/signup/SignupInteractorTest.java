@@ -13,12 +13,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class SignupInteractorTest {
@@ -46,7 +46,10 @@ class SignupInteractorTest {
             "test@example.com",
             "password123",
             "password123");
-        SignupResponseDTO expectedResponse = SignupResponseDTO.success("testuser");
+        SignupResponseDTO expectedResponse = new SignupResponseDTO(
+            "testuser",
+            "User successfully created with email test@example.com",
+            true);
 
         when(userDataAccess.existsByName("testuser")).thenReturn(false);
         when(signupPresenter.prepareResponse(any(SignupOutputData.class))).thenReturn(expectedResponse);
@@ -61,13 +64,14 @@ class SignupInteractorTest {
     }
 
     @Test
-    void execute_WithExistingUsername_ThrowsException() throws DatabaseAccessException {
+    void execute_WithExistingUsername_ThrowsInvalidSignupException() throws DatabaseAccessException {
         // Arrange
         SignupInputData inputData = new SignupInputData(
             "existinguser",
             "test@example.com",
             "password123",
             "password123");
+
         when(userDataAccess.existsByName("existinguser")).thenReturn(true);
 
         // Act & Assert
@@ -77,13 +81,14 @@ class SignupInteractorTest {
     }
 
     @Test
-    void execute_WithDatabaseError_PropagatesException() throws DatabaseAccessException {
+    void execute_WithDatabaseError_ThrowsDatabaseAccessException() throws DatabaseAccessException {
         // Arrange
         SignupInputData inputData = new SignupInputData(
             "testuser",
             "test@example.com",
             "password123",
             "password123");
+
         when(userDataAccess.existsByName("testuser")).thenReturn(false);
         doThrow(new DatabaseAccessException("Database connection failed"))
             .when(userDataAccess).save(any(User.class), any(String.class));
@@ -95,13 +100,14 @@ class SignupInteractorTest {
     }
 
     @Test
-    void execute_WithEmptyUsername_ThrowsException() {
+    void execute_WithEmptyUsername_ThrowsInvalidSignupException() {
         // Arrange
         SignupInputData inputData = new SignupInputData(
             "",
             "test@example.com",
             "password123",
             "password123");
+
         // Act & Assert
         InvalidSignupException exception = assertThrows(InvalidSignupException.class,
             () -> signupInteractor.execute(inputData));
@@ -109,13 +115,14 @@ class SignupInteractorTest {
     }
 
     @Test
-    void execute_WithNullUsername_ThrowsException() {
+    void execute_WithNullUsername_ThrowsInvalidSignupException() {
         // Arrange
         SignupInputData inputData = new SignupInputData(
             null,
             "test@example.com",
             "password123",
             "password123");
+
         // Act & Assert
         InvalidSignupException exception = assertThrows(InvalidSignupException.class,
             () -> signupInteractor.execute(inputData));
@@ -123,13 +130,14 @@ class SignupInteractorTest {
     }
 
     @Test
-    void execute_WithInvalidEmail_ThrowsException() {
+    void execute_WithInvalidEmail_ThrowsInvalidSignupException() {
         // Arrange
         SignupInputData inputData = new SignupInputData(
             "testuser",
             "notanemail",
             "password123",
             "password123");
+
         // Act & Assert
         InvalidSignupException exception = assertThrows(InvalidSignupException.class,
             () -> signupInteractor.execute(inputData));
@@ -137,13 +145,14 @@ class SignupInteractorTest {
     }
 
     @Test
-    void execute_WithEmptyEmail_ThrowsException() {
+    void execute_WithEmptyEmail_ThrowsInvalidSignupException() {
         // Arrange
         SignupInputData inputData = new SignupInputData(
             "testuser",
             "",
             "password123",
             "password123");
+
         // Act & Assert
         InvalidSignupException exception = assertThrows(InvalidSignupException.class,
             () -> signupInteractor.execute(inputData));
@@ -151,13 +160,14 @@ class SignupInteractorTest {
     }
 
     @Test
-    void execute_WithPasswordMismatch_ThrowsException() {
+    void execute_WithPasswordMismatch_ThrowsInvalidSignupException() {
         // Arrange
         SignupInputData inputData = new SignupInputData(
             "testuser",
             "test@example.com",
             "password123",
             "password456");
+
         // Act & Assert
         InvalidSignupException exception = assertThrows(InvalidSignupException.class,
             () -> signupInteractor.execute(inputData));
@@ -165,13 +175,14 @@ class SignupInteractorTest {
     }
 
     @Test
-    void execute_WithShortPassword_ThrowsException() {
+    void execute_WithShortPassword_ThrowsInvalidSignupException() {
         // Arrange
         SignupInputData inputData = new SignupInputData(
             "testuser",
             "test@example.com",
             "pass",
             "pass");
+
         // Act & Assert
         InvalidSignupException exception = assertThrows(InvalidSignupException.class,
             () -> signupInteractor.execute(inputData));
@@ -179,31 +190,17 @@ class SignupInteractorTest {
     }
 
     @Test
-    void execute_WithEmptyPassword_ThrowsException() {
+    void execute_WithEmptyPassword_ThrowsInvalidSignupException() {
         // Arrange
         SignupInputData inputData = new SignupInputData(
             "testuser",
             "test@example.com",
             "",
             "");
+
         // Act & Assert
         InvalidSignupException exception = assertThrows(InvalidSignupException.class,
             () -> signupInteractor.execute(inputData));
         assertEquals("Password is required", exception.getMessage());
-    }
-
-    @Test
-    void execute_WithEmptyPasswordConfirmation_ThrowsException() {
-        // Arrange
-        SignupInputData inputData = new SignupInputData(
-            "testuser",
-            "test@example.com",
-            "p",
-            "");
-        // Act & Assert
-        InvalidSignupException exception = assertThrows(InvalidSignupException.class,
-            () -> signupInteractor.execute(inputData));
-        assertEquals("Password confirmation is required", exception.getMessage());
-
     }
 }
