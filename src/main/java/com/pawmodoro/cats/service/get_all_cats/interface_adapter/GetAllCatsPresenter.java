@@ -12,18 +12,10 @@ import com.pawmodoro.cats.service.get_all_cats.GetAllCatsOutputData;
 public class GetAllCatsPresenter implements GetAllCatsOutputBoundary {
 
     @Override
-    public GetAllCatsResponseDTO prepareSuccessResponse(GetAllCatsOutputData outputData) {
+    public GetAllCatsResponseDTO prepareResponse(GetAllCatsOutputData outputData) {
         return new GetAllCatsResponseDTO(
             true,
             outputData.getCats(),
             "Successfully retrieved cats");
-    }
-
-    @Override
-    public GetAllCatsResponseDTO prepareFailResponse(GetAllCatsOutputData outputData) {
-        return new GetAllCatsResponseDTO(
-            false,
-            null,
-            outputData.getErrorMessage());
     }
 }

@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.pawmodoro.cats.entity.Cat;
+import com.pawmodoro.cats.entity.CatAuthenticationException;
 import com.pawmodoro.cats.service.get_all_cats.interface_adapter.GetAllCatsResponseDTO;
 import com.pawmodoro.core.DatabaseAccessException;
 
@@ -40,7 +41,8 @@ class GetAllCatsInteractorTest {
     }
 
     @Test
-    void execute_WhenCatsExist_ReturnsSuccessResponse() throws DatabaseAccessException {
+    void execute_WhenCatsExist_ReturnsSuccessResponse()
+        throws DatabaseAccessException, CatAuthenticationException {
         // Arrange
         Collection<Cat> cats = new ArrayList<>();
         cats.add(mockCat);
@@ -49,8 +51,9 @@ class GetAllCatsInteractorTest {
         GetAllCatsResponseDTO expectedResponseDTO =
             new GetAllCatsResponseDTO(true, cats, "Successfully retrieved cats");
 
-        when(catDataAccessObject.getCatsByOwner(TEST_USERNAME)).thenReturn(cats);
-        when(getAllCatsPresenter.prepareSuccessResponse(any(GetAllCatsOutputData.class)))
+        when(catDataAccessObject.getCatsByOwner(TEST_USERNAME))
+            .thenReturn(cats);
+        when(getAllCatsPresenter.prepareResponse(any(GetAllCatsOutputData.class)))
             .thenReturn(expectedResponseDTO);
 
         // Act
@@ -63,19 +66,21 @@ class GetAllCatsInteractorTest {
         assertEquals("Successfully retrieved cats", actualResponse.message());
 
         verify(catDataAccessObject).getCatsByOwner(TEST_USERNAME);
-        verify(getAllCatsPresenter).prepareSuccessResponse(any(GetAllCatsOutputData.class));
+        verify(getAllCatsPresenter).prepareResponse(any(GetAllCatsOutputData.class));
     }
 
     @Test
-    void execute_WhenNoCatsExist_ReturnsEmptySuccessResponse() throws DatabaseAccessException {
+    void execute_WhenNoCatsExist_ReturnsEmptySuccessResponse()
+        throws DatabaseAccessException, CatAuthenticationException {
         // Arrange
         Collection<Cat> emptyCats = new ArrayList<>();
         GetAllCatsInputData inputData = new GetAllCatsInputData(TEST_USERNAME);
         GetAllCatsResponseDTO expectedResponseDTO =
             new GetAllCatsResponseDTO(true, emptyCats, "Successfully retrieved cats");
 
-        when(catDataAccessObject.getCatsByOwner(TEST_USERNAME)).thenReturn(emptyCats);
-        when(getAllCatsPresenter.prepareSuccessResponse(any(GetAllCatsOutputData.class)))
+        when(catDataAccessObject.getCatsByOwner(TEST_USERNAME))
+            .thenReturn(emptyCats);
+        when(getAllCatsPresenter.prepareResponse(any(GetAllCatsOutputData.class)))
             .thenReturn(expectedResponseDTO);
 
         // Act
@@ -88,11 +93,12 @@ class GetAllCatsInteractorTest {
         assertEquals("Successfully retrieved cats", actualResponse.message());
 
         verify(catDataAccessObject).getCatsByOwner(TEST_USERNAME);
-        verify(getAllCatsPresenter).prepareSuccessResponse(any(GetAllCatsOutputData.class));
+        verify(getAllCatsPresenter).prepareResponse(any(GetAllCatsOutputData.class));
     }
 
     @Test
-    void execute_WhenNullUsername_ThrowsException() throws DatabaseAccessException {
+    void execute_WhenNullUsername_ThrowsException()
+        throws DatabaseAccessException, CatAuthenticationException {
         // Arrange
         GetAllCatsInputData inputData = new GetAllCatsInputData(null);
 
@@ -108,12 +114,12 @@ class GetAllCatsInteractorTest {
         assertEquals("Username cannot be null or empty", exception.getResponse().message());
 
         verify(catDataAccessObject, never()).getCatsByOwner(any());
-        verify(getAllCatsPresenter, never()).prepareSuccessResponse(any());
-        verify(getAllCatsPresenter, never()).prepareFailResponse(any());
+        verify(getAllCatsPresenter, never()).prepareResponse(any());
     }
 
     @Test
-    void execute_WhenEmptyUsername_ThrowsException() throws DatabaseAccessException {
+    void execute_WhenEmptyUsername_ThrowsException()
+        throws DatabaseAccessException, CatAuthenticationException {
         // Arrange
         GetAllCatsInputData inputData = new GetAllCatsInputData("");
 
@@ -129,7 +135,24 @@ class GetAllCatsInteractorTest {
         assertEquals("Username cannot be null or empty", exception.getResponse().message());
 
         verify(catDataAccessObject, never()).getCatsByOwner(any());
-        verify(getAllCatsPresenter, never()).prepareSuccessResponse(any());
-        verify(getAllCatsPresenter, never()).prepareFailResponse(any());
+        verify(getAllCatsPresenter, never()).prepareResponse(any());
+    }
+
+    @Test
+    void execute_WhenUnauthorized_ThrowsCatAuthenticationException()
+        throws DatabaseAccessException, CatAuthenticationException {
+        // Arrange
+        GetAllCatsInputData inputData = new GetAllCatsInputData(TEST_USERNAME);
+        when(catDataAccessObject.getCatsByOwner(TEST_USERNAME))
+            .thenThrow(new CatAuthenticationException("User not authorized to view these cats"));
+
+        // Act & Assert
+        CatAuthenticationException exception = assertThrows(CatAuthenticationException.class, () -> {
+            interactor.execute(inputData);
+        });
+
+        assertEquals("User not authorized to view these cats", exception.getMessage());
+        verify(catDataAccessObject).getCatsByOwner(TEST_USERNAME);
+        verify(getAllCatsPresenter, never()).prepareResponse(any());
     }
 }

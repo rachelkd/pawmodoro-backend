@@ -13,12 +13,5 @@ public interface GetAllCatsOutputBoundary {
      * @param outputData the output data from the get all cats use case
      * @return formatted response DTO for success case
      */
-    GetAllCatsResponseDTO prepareSuccessResponse(GetAllCatsOutputData outputData);
-
-    /**
-     * Formats a failed get all cats response.
-     * @param outputData the output data containing error information
-     * @return formatted response DTO for failure case
-     */
-    GetAllCatsResponseDTO prepareFailResponse(GetAllCatsOutputData outputData);
+    GetAllCatsResponseDTO prepareResponse(GetAllCatsOutputData outputData);
 }

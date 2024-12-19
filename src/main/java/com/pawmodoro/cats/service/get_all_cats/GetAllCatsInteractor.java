@@ -34,6 +34,6 @@ public class GetAllCatsInteractor implements GetAllCatsInputBoundary {
 
         Collection<Cat> cats = catDataAccessObject.getCatsByOwner(getAllCatsInputData.getOwnerUsername());
         GetAllCatsOutputData outputData = new GetAllCatsOutputData(cats, true, null);
-        return getAllCatsPresenter.prepareSuccessResponse(outputData);
+        return getAllCatsPresenter.prepareResponse(outputData);
     }
 }
