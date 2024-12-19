@@ -1,4 +1,4 @@
-package com.pawmodoro.cats.data_access;
+package com.pawmodoro.cats.service;
 
 import com.pawmodoro.cats.entity.Cat;
 import com.pawmodoro.cats.entity.NoCatsFoundException;
