@@ -1,12 +1,13 @@
 package com.pawmodoro.users.service.signup.interface_adapter;
 
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.http.HttpStatus;
 
 import com.pawmodoro.core.DatabaseAccessException;
 import com.pawmodoro.users.service.signup.SignupInputBoundary;
 import com.pawmodoro.users.service.signup.SignupInputData;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,13 +34,14 @@ public class SignupController {
     /**
      * Handles POST requests for user signup.
      * Validates the request, converts it into a domain-specific input data object,
-     * processes it through the use case interactor, and returns the formatted response.
+     * and processes it through the use case interactor.
      * @param request the signup request containing username, email, and password
-     * @return ResponseEntity containing the signup response
+     * @return SignupResponseDTO containing the signup response
      * @throws DatabaseAccessException if there is a database error
      */
     @PostMapping
-    public ResponseEntity<SignupResponseDTO> signup(
+    @ResponseStatus(HttpStatus.CREATED)
+    public SignupResponseDTO signup(
         @Valid
         @RequestBody
         SignupRequestDTO request) throws DatabaseAccessException {
@@ -50,7 +52,6 @@ public class SignupController {
             request.password(),
             request.confirmPassword());
 
-        SignupResponseDTO responseDTO = signupInteractor.execute(inputData);
-        return ResponseEntity.ok(responseDTO);
+        return signupInteractor.execute(inputData);
     }
 }
