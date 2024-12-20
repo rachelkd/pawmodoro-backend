@@ -17,7 +17,6 @@ import com.pawmodoro.cats.entity.CatFactory;
 import com.pawmodoro.cats.service.get_all_cats.GetAllCatsDataAccessInterface;
 import com.pawmodoro.constants.Constants;
 import com.pawmodoro.core.DatabaseAccessException;
-
 import jakarta.servlet.http.HttpServletRequest;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
