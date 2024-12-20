@@ -14,7 +14,6 @@ import com.pawmodoro.users.entity.UserFactory;
 import com.pawmodoro.users.entity.UserNotFoundException;
 import com.pawmodoro.users.service.login.LoginUserDataAccessInterface;
 import com.pawmodoro.users.service.signup.SignupUserDataAccessInterface;
-
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -70,6 +69,8 @@ public class DbUserDataAccessObject implements SignupUserDataAccessInterface,
     /**
      * Creates a new DbUserDataAccessObject.
      * @param userFactory factory for creating User objects
+     * @param apiUrl the Supabase API URL
+     * @param apiKey the Supabase API key
      */
     public DbUserDataAccessObject(
         UserFactory userFactory,
@@ -182,8 +183,8 @@ public class DbUserDataAccessObject implements SignupUserDataAccessInterface,
      * @throws DatabaseAccessException if authentication fails
      * @throws UserNotFoundException if the user is not found
      */
-    private JSONObject authenticateUser(String email, String password)
-        throws DatabaseAccessException, UserNotFoundException {
+    private JSONObject authenticateUser(String email,
+        String password) throws DatabaseAccessException, UserNotFoundException {
         final JSONObject authBody = new JSONObject()
             .put(EMAIL_FIELD, email)
             .put(PASSWORD_FIELD, password);
