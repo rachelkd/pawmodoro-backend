@@ -1,17 +1,16 @@
 package com.pawmodoro.users.service.login.interface_adapter;
 
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.pawmodoro.core.DatabaseAccessException;
 import com.pawmodoro.users.entity.UserNotFoundException;
 import com.pawmodoro.users.service.login.LoginInputBoundary;
 import com.pawmodoro.users.service.login.LoginInputData;
-
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import jakarta.validation.Valid;
 
 /**
@@ -48,7 +47,7 @@ public class LoginController {
         @RequestBody
         LoginRequestDTO request) throws UserNotFoundException, DatabaseAccessException {
 
-        LoginInputData inputData = new LoginInputData(request.username(), request.password());
+        final LoginInputData inputData = new LoginInputData(request.username(), request.password());
         return loginInteractor.execute(inputData);
     }
 }
