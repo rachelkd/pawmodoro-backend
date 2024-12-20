@@ -1,6 +1,6 @@
 package com.pawmodoro.users.service.signup;
 
-import com.pawmodoro.users.service.signup.interface_adapter.SignupResponseDTO;
+import com.pawmodoro.users.service.signup.interface_adapter.SignupResponseDto;
 
 /**
  * Output boundary for formatting signup responses.
@@ -14,5 +14,5 @@ public interface SignupOutputBoundary {
      * @param outputData the output data from the signup use case
      * @return formatted signup response DTO
      */
-    SignupResponseDTO prepareResponse(SignupOutputData outputData);
+    SignupResponseDto prepareResponse(SignupOutputData outputData);
 }

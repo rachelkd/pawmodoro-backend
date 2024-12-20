@@ -14,18 +14,20 @@ import com.pawmodoro.users.service.signup.SignupOutputData;
 public class SignupPresenter implements SignupOutputBoundary {
 
     @Override
-    public SignupResponseDTO prepareResponse(SignupOutputData outputData) {
+    public SignupResponseDto prepareResponse(SignupOutputData outputData) {
+        final SignupResponseDto response;
         if (outputData.isSuccess()) {
-            return new SignupResponseDTO(
+            response = new SignupResponseDto(
                 outputData.getUsername(),
                 "User successfully created with email " + outputData.getEmail(),
                 true);
         }
         else {
-            return new SignupResponseDTO(
+            response = new SignupResponseDto(
                 null,
                 outputData.getError(),
                 false);
         }
+        return response;
     }
 }

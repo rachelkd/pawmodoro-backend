@@ -1,7 +1,7 @@
 package com.pawmodoro.users.service.signup;
 
 import com.pawmodoro.core.DatabaseAccessException;
-import com.pawmodoro.users.service.signup.interface_adapter.SignupResponseDTO;
+import com.pawmodoro.users.service.signup.interface_adapter.SignupResponseDto;
 
 /**
  * Input boundary for the signup use case.
@@ -18,6 +18,5 @@ public interface SignupInputBoundary {
      * @throws InvalidSignupException if signup validation fails
      * @throws DatabaseAccessException if there is a database error
      */
-    SignupResponseDTO execute(SignupInputData signupInputData)
-        throws DatabaseAccessException;
+    SignupResponseDto execute(SignupInputData signupInputData) throws DatabaseAccessException;
 }

@@ -1,10 +1,9 @@
 package com.pawmodoro.users.service.signup;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.pawmodoro.users.service.signup.interface_adapter.SignupResponseDTO;
-
-import org.springframework.http.HttpStatus;
+import com.pawmodoro.users.service.signup.interface_adapter.SignupResponseDto;
 
 /**
  * Exception thrown when signup validation fails.
@@ -13,7 +12,7 @@ import org.springframework.http.HttpStatus;
  */
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class InvalidSignupException extends RuntimeException {
-    private final transient SignupResponseDTO response;
+    private final transient SignupResponseDto response;
 
     /**
      * Constructs an InvalidSignupException with an error message and response DTO.
@@ -21,14 +20,14 @@ public class InvalidSignupException extends RuntimeException {
      */
     public InvalidSignupException(String message) {
         super(message);
-        this.response = SignupResponseDTO.error(message);
+        this.response = SignupResponseDto.error(message);
     }
 
     /**
      * Gets the response DTO containing error details.
      * @return the error response DTO
      */
-    public SignupResponseDTO getResponse() {
+    public SignupResponseDto getResponse() {
         return response;
     }
 }

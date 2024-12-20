@@ -1,16 +1,15 @@
 package com.pawmodoro.users.service.signup.interface_adapter;
 
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.pawmodoro.core.DatabaseAccessException;
 import com.pawmodoro.users.service.signup.SignupInputBoundary;
 import com.pawmodoro.users.service.signup.SignupInputData;
-
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import jakarta.validation.Valid;
 
 /**
@@ -41,12 +40,12 @@ public class SignupController {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public SignupResponseDTO signup(
+    public SignupResponseDto signup(
         @Valid
         @RequestBody
-        SignupRequestDTO request) throws DatabaseAccessException {
+        SignupRequestDto request) throws DatabaseAccessException {
 
-        SignupInputData inputData = new SignupInputData(
+        final SignupInputData inputData = new SignupInputData(
             request.username(),
             request.email(),
             request.password(),
