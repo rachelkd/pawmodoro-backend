@@ -1,8 +1,9 @@
 package com.pawmodoro.users.service.login.interface_adapter;
 
+import com.pawmodoro.constants.Constants.ValidationConstants;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 /**
  * Data Transfer Object for login requests.
@@ -11,13 +12,23 @@ import jakarta.validation.constraints.Pattern;
  * @param username the username or email of the user attempting to login
  * @param password the user's password
  */
-public record LoginRequestDTO(
+public record LoginRequestDto(
     @NotBlank(message = "Please enter a username")
-    @Size(min = 3, max = 50, message = "Username length must be between 3 and 50 characters")
+    @Size(min = ValidationConstants.MIN_USERNAME_LENGTH,
+        max = ValidationConstants.MAX_USERNAME_LENGTH,
+        message = "Username length must be between "
+            + ValidationConstants.MIN_USERNAME_LENGTH + " and "
+            + ValidationConstants.MAX_USERNAME_LENGTH + " characters")
     @Pattern(regexp = "^[a-zA-Z0-9._-]+$",
         message = "Username can only contain letters, numbers, dots, underscores, and hyphens")
     String username,
 
     @NotBlank(message = "Please enter a password")
-    @Size(min = 6, max = 50, message = "Password length must be between 6 and 50 characters")
-    String password) {}
+    @Size(min = ValidationConstants.MIN_PASSWORD_LENGTH,
+        max = ValidationConstants.MAX_PASSWORD_LENGTH,
+        message = "Password length must be between "
+            + ValidationConstants.MIN_PASSWORD_LENGTH + " and "
+            + ValidationConstants.MAX_PASSWORD_LENGTH + " characters")
+    String password) {
+
+}

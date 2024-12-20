@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import com.pawmodoro.core.DatabaseAccessException;
 import com.pawmodoro.users.entity.User;
 import com.pawmodoro.users.entity.UserNotFoundException;
-import com.pawmodoro.users.service.login.interface_adapter.LoginResponseDTO;
+import com.pawmodoro.users.service.login.interface_adapter.LoginResponseDto;
 
 /**
  * The Login Interactor implements the business logic for user authentication.
@@ -29,7 +29,7 @@ public class LoginInteractor implements LoginInputBoundary {
     }
 
     @Override
-    public LoginResponseDTO execute(
+    public LoginResponseDto execute(
         LoginInputData loginInputData) throws DatabaseAccessException, UserNotFoundException {
         validateInput(loginInputData);
 
@@ -58,7 +58,7 @@ public class LoginInteractor implements LoginInputBoundary {
      * @param token the authentication token
      * @return formatted login response
      */
-    private LoginResponseDTO prepareSuccessResponse(String username, String token) {
+    private LoginResponseDto prepareSuccessResponse(String username, String token) {
         return loginPresenter.prepareResponse(
             new LoginOutputData(username, token));
     }

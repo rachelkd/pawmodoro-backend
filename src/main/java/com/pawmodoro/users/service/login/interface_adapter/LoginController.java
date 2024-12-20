@@ -42,10 +42,10 @@ public class LoginController {
      */
     @PostMapping("")
     @ResponseStatus(HttpStatus.OK)
-    public LoginResponseDTO login(
+    public LoginResponseDto login(
         @Valid
         @RequestBody
-        LoginRequestDTO request) throws UserNotFoundException, DatabaseAccessException {
+        LoginRequestDto request) throws UserNotFoundException, DatabaseAccessException {
 
         final LoginInputData inputData = new LoginInputData(request.username(), request.password());
         return loginInteractor.execute(inputData);

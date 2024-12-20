@@ -5,7 +5,7 @@ import com.pawmodoro.users.entity.CommonUserFactory;
 import com.pawmodoro.users.entity.User;
 import com.pawmodoro.users.entity.UserFactory;
 import com.pawmodoro.users.entity.UserNotFoundException;
-import com.pawmodoro.users.service.login.interface_adapter.LoginResponseDTO;
+import com.pawmodoro.users.service.login.interface_adapter.LoginResponseDto;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,12 +38,11 @@ class LoginInteractorTest {
     }
 
     @Test
-    void execute_WithValidCredentials_ReturnsSuccessResponse()
-        throws DatabaseAccessException, UserNotFoundException {
+    void execute_WithValidCredentials_ReturnsSuccessResponse() throws DatabaseAccessException, UserNotFoundException {
         // Arrange
         LoginInputData inputData = new LoginInputData("testuser", "password123");
         User user = userFactory.create("testuser", "test@example.com");
-        LoginResponseDTO expectedResponse = new LoginResponseDTO(true, "token123", "Login successful", "testuser");
+        LoginResponseDto expectedResponse = new LoginResponseDto(true, "token123", "Login successful", "testuser");
 
         when(mockUserDataAccess.get("testuser")).thenReturn(user);
         when(mockUserDataAccess.authenticate("test@example.com", "password123")).thenReturn(user);
@@ -51,7 +50,7 @@ class LoginInteractorTest {
         when(mockLoginPresenter.prepareResponse(any(LoginOutputData.class))).thenReturn(expectedResponse);
 
         // Act
-        LoginResponseDTO response = loginInteractor.execute(inputData);
+        LoginResponseDto response = loginInteractor.execute(inputData);
 
         // Assert
         assertEquals(expectedResponse, response);
@@ -60,8 +59,7 @@ class LoginInteractorTest {
     }
 
     @Test
-    void execute_WithNonexistentUser_ThrowsUserNotFoundException()
-        throws DatabaseAccessException, UserNotFoundException {
+    void execute_WithNonexistentUser_ThrowsUserNotFoundException() throws DatabaseAccessException, UserNotFoundException {
         // Arrange
         LoginInputData inputData = new LoginInputData("nonexistent", "password123");
 
@@ -75,8 +73,7 @@ class LoginInteractorTest {
     }
 
     @Test
-    void execute_WithIncorrectPassword_ThrowsUserNotFoundException()
-        throws DatabaseAccessException, UserNotFoundException {
+    void execute_WithIncorrectPassword_ThrowsUserNotFoundException() throws DatabaseAccessException, UserNotFoundException {
         // Arrange
         LoginInputData inputData = new LoginInputData("testuser", "wrongpassword");
         User user = userFactory.create("testuser", "test@example.com");
@@ -92,8 +89,7 @@ class LoginInteractorTest {
     }
 
     @Test
-    void execute_WithDatabaseError_ThrowsDatabaseAccessException()
-        throws DatabaseAccessException, UserNotFoundException {
+    void execute_WithDatabaseError_ThrowsDatabaseAccessException() throws DatabaseAccessException, UserNotFoundException {
         // Arrange
         LoginInputData inputData = new LoginInputData("testuser", "password123");
 

@@ -13,20 +13,14 @@ import com.pawmodoro.users.service.login.LoginOutputData;
 public class LoginPresenter implements LoginOutputBoundary {
 
     @Override
-    public LoginResponseDTO prepareResponse(LoginOutputData outputData) {
+    public LoginResponseDto prepareResponse(LoginOutputData outputData) {
+        final LoginResponseDto response;
         if (outputData.isSuccess()) {
-            return new LoginResponseDTO(
-                true,
-                outputData.getToken(),
-                "Login successful",
-                outputData.getUsername());
+            response = new LoginResponseDto(true, outputData.getToken(), "Login successful", outputData.getUsername());
         }
         else {
-            return new LoginResponseDTO(
-                false,
-                null,
-                outputData.getError(),
-                null);
+            response = new LoginResponseDto(false, null, outputData.getError(), null);
         }
+        return response;
     }
 }

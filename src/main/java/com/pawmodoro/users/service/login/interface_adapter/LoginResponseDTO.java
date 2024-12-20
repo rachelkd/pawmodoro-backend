@@ -8,8 +8,10 @@ package com.pawmodoro.users.service.login.interface_adapter;
  * @param message success or error message
  * @param username the username of the logged-in user (null if login failed)
  */
-public record LoginResponseDTO(
+public record LoginResponseDto(
     boolean success,
     String token,
     String message,
-    String username) {}
+    String username) {
+
+}

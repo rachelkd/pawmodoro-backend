@@ -1,6 +1,6 @@
 package com.pawmodoro.users.service.login;
 
-import com.pawmodoro.users.service.login.interface_adapter.LoginResponseDTO;
+import com.pawmodoro.users.service.login.interface_adapter.LoginResponseDto;
 
 /**
  * Output boundary for formatting login responses.
@@ -14,5 +14,5 @@ public interface LoginOutputBoundary {
      * @param outputData the output data from the login use case
      * @return formatted login response DTO
      */
-    LoginResponseDTO prepareResponse(LoginOutputData outputData);
+    LoginResponseDto prepareResponse(LoginOutputData outputData);
 }
