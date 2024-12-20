@@ -41,6 +41,9 @@ public class DbUserSettingsDataAccessObject
     private static final int HTTP_UNAUTHORIZED = 401;
 
     // Default settings values
+    private static final int DEFAULT_FOCUS_DURATION = 25;
+    private static final int DEFAULT_SHORT_BREAK = 5;
+    private static final int DEFAULT_LONG_BREAK = 15;
     private static final boolean DEFAULT_AUTO_START_BREAKS = false;
     private static final boolean DEFAULT_AUTO_START_FOCUS = false;
 
@@ -160,9 +163,9 @@ public class DbUserSettingsDataAccessObject
     private UserSettings createDefaultSettings(String username) {
         return new UserSettings(
             username,
-            UserSettings.DEFAULT_FOCUS_DURATION,
-            UserSettings.DEFAULT_SHORT_BREAK_DURATION,
-            UserSettings.DEFAULT_LONG_BREAK_DURATION,
+            DEFAULT_FOCUS_DURATION,
+            DEFAULT_SHORT_BREAK,
+            DEFAULT_LONG_BREAK,
             DEFAULT_AUTO_START_BREAKS,
             DEFAULT_AUTO_START_FOCUS);
     }
