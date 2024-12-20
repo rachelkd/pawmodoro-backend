@@ -1,10 +1,7 @@
 package com.pawmodoro.core;
 
-import com.pawmodoro.cats.entity.CatAuthenticationException;
-import com.pawmodoro.cats.service.get_all_cats.InvalidGetAllCatsException;
-import com.pawmodoro.users.entity.UserNotFoundException;
-import com.pawmodoro.users.service.login.InvalidLoginException;
-import com.pawmodoro.users.service.signup.InvalidSignupException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,8 +9,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.pawmodoro.cats.entity.CatAuthenticationException;
+import com.pawmodoro.cats.service.get_all_cats.InvalidGetAllCatsException;
+import com.pawmodoro.users.entity.UserNotFoundException;
+import com.pawmodoro.users.service.login.InvalidLoginException;
+import com.pawmodoro.users.service.signup.InvalidSignupException;
 
 /**
  * Global exception handler for the application.
@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
      * @return Map containing error details
      */
     private Map<String, String> createErrorResponse(String message) {
-        Map<String, String> errorResponse = new HashMap<>();
+        final Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("message", message);
         return errorResponse;
     }
@@ -42,7 +42,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException exception) {
-        Map<String, String> errorMap = new HashMap<>();
+        final Map<String, String> errorMap = new HashMap<>();
         exception.getBindingResult().getFieldErrors()
             .forEach(error -> errorMap.put(error.getField(), error.getDefaultMessage()));
         return errorMap;
