@@ -35,3 +35,11 @@ build/
 
 ### Spring Boot ###
 application-local.properties
+
+### Old Java Swing Implementation ###
+src/main/java/data_access/
+src/main/java/entity/
+src/main/java/interface_adapter/
+src/main/java/use_case/
+
+mystyle.xml
