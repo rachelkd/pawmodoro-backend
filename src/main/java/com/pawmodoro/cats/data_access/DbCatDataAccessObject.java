@@ -14,42 +14,22 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import com.pawmodoro.cats.entity.Cat;
 import com.pawmodoro.cats.entity.CatAuthenticationException;
 import com.pawmodoro.cats.entity.CatFactory;
-import com.pawmodoro.cats.entity.NoCatsFoundException;
 import com.pawmodoro.cats.service.get_all_cats.GetAllCatsDataAccessInterface;
+import com.pawmodoro.constants.Constants;
 import com.pawmodoro.core.DatabaseAccessException;
 
 import jakarta.servlet.http.HttpServletRequest;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
  * Database implementation of CatDataAccessInterface using Supabase.
+ * This class handles all cat-related database operations including retrieving cats by owner.
  */
 @Repository
 public class DbCatDataAccessObject implements GetAllCatsDataAccessInterface {
-    private static final String API_KEY_HEADER = "apikey";
-    private static final String AUTH_HEADER = "Authorization";
-    private static final String BEARER_PREFIX = "Bearer ";
-    private static final String CONTENT_TYPE_JSON = "application/json";
-    private static final String PREFER_HEADER = "Prefer";
-    private static final String PREFER_RETURN_MINIMAL = "return=minimal";
-    private static final String CONTENT_TYPE_HEADER = "Content-Type";
-    private static final String EMPTY_JSON_ARRAY = "[]";
-
-    private static final String CATS_ENDPOINT = "/rest/v1/cats";
-    private static final String NAME_QUERY = "?cat_name=eq.";
-    private static final String OWNER_QUERY = "&owner_username=eq.";
-
-    private static final String NAME_COLUMN = "cat_name";
-    private static final String OWNER_USERNAME_COLUMN = "owner_username";
-    private static final String HAPPINESS_LEVEL_COLUMN = "happiness_level";
-    private static final String HUNGER_LEVEL_COLUMN = "hunger_level";
-    private static final String IMAGE_FILE_NAME_COLUMN = "image_file_name";
-
-    private final OkHttpClient client = new OkHttpClient().newBuilder().build();
+    private final OkHttpClient client;
     private final String apiUrl;
     private final String apiKey;
     private final CatFactory catFactory;
@@ -57,6 +37,8 @@ public class DbCatDataAccessObject implements GetAllCatsDataAccessInterface {
     /**
      * Creates a new DbCatDataAccessObject.
      * @param catFactory the factory to create Cat entities
+     * @param apiUrl the Supabase API URL
+     * @param apiKey the Supabase API key
      */
     public DbCatDataAccessObject(
         CatFactory catFactory,
@@ -65,28 +47,30 @@ public class DbCatDataAccessObject implements GetAllCatsDataAccessInterface {
         @Value("${supabase.key}")
         String apiKey) {
         this.catFactory = catFactory;
+        this.client = new OkHttpClient().newBuilder().build();
         this.apiUrl = apiUrl;
         this.apiKey = apiKey;
     }
 
     @Override
-    public Collection<Cat> getCatsByOwner(String ownerUsername)
-        throws DatabaseAccessException, CatAuthenticationException {
+    public Collection<Cat> getCatsByOwner(
+        String ownerUsername) throws DatabaseAccessException, CatAuthenticationException {
         // Get the authorization token from the current request
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+        final HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
             .getRequest();
-        String authToken = request.getHeader(AUTH_HEADER);
+        final String authToken = request.getHeader(Constants.Http.AUTH_HEADER);
 
-        if (authToken == null || !authToken.startsWith(BEARER_PREFIX)) {
-            throw new CatAuthenticationException("Authorization token is required");
+        if (authToken == null || !authToken.startsWith(Constants.Http.BEARER_PREFIX)) {
+            throw new CatAuthenticationException(Constants.ErrorMessages.AUTH_TOKEN_REQUIRED);
         }
 
         final Collection<Cat> cats = new ArrayList<>();
         final Request supabaseRequest = new Request.Builder()
-            .url(apiUrl + CATS_ENDPOINT + "?owner_username=eq." + ownerUsername)
+            .url(apiUrl + Constants.Endpoints.CATS_ENDPOINT + Constants.Http.QUERY_START
+                + Constants.JsonFields.OWNER_USERNAME + Constants.Http.QUERY_EQUALS + ownerUsername)
             .get()
-            .addHeader(API_KEY_HEADER, apiKey)
-            .addHeader(AUTH_HEADER, authToken)
+            .addHeader(Constants.Http.API_KEY_HEADER, apiKey)
+            .addHeader(Constants.Http.AUTH_HEADER, authToken)
             .build();
 
         try {
@@ -94,28 +78,30 @@ public class DbCatDataAccessObject implements GetAllCatsDataAccessInterface {
             final String responseBody = response.body().string();
 
             if (!response.isSuccessful()) {
-                if (response.code() == 401) {
-                    throw new CatAuthenticationException("Invalid authorization token");
+                if (response.code() == Constants.StatusCodes.UNAUTHORIZED) {
+                    throw new CatAuthenticationException(Constants.ErrorMessages.AUTH_TOKEN_INVALID);
                 }
-                throw new DatabaseAccessException("Failed to retrieve cats: " + response.message());
+                throw new DatabaseAccessException(
+                    String.format(Constants.ErrorMessages.DB_FAILED_RETRIEVE_CATS, response.message()));
             }
 
-            if (!responseBody.equals(EMPTY_JSON_ARRAY)) {
+            if (!responseBody.equals(Constants.JsonFields.EMPTY_ARRAY)) {
                 final JSONArray jsonArray = new JSONArray(responseBody);
                 for (int i = 0; i < jsonArray.length(); i++) {
                     final JSONObject catJson = jsonArray.getJSONObject(i);
                     final Cat cat = catFactory.create(
-                        catJson.getString(NAME_COLUMN),
-                        catJson.getString(OWNER_USERNAME_COLUMN),
-                        catJson.getInt(HAPPINESS_LEVEL_COLUMN),
-                        catJson.getInt(HUNGER_LEVEL_COLUMN),
-                        catJson.getString(IMAGE_FILE_NAME_COLUMN));
+                        catJson.getString(Constants.JsonFields.CAT_NAME),
+                        catJson.getString(Constants.JsonFields.OWNER_USERNAME),
+                        catJson.getInt(Constants.JsonFields.HAPPINESS_LEVEL),
+                        catJson.getInt(Constants.JsonFields.HUNGER_LEVEL),
+                        catJson.getString(Constants.JsonFields.IMAGE_FILE_NAME));
                     cats.add(cat);
                 }
             }
         }
         catch (final IOException exception) {
-            throw new DatabaseAccessException("Failed to retrieve cats: " + exception.getMessage());
+            throw new DatabaseAccessException(
+                String.format(Constants.ErrorMessages.DB_FAILED_RETRIEVE_CATS, exception.getMessage()));
         }
         return cats;
     }
