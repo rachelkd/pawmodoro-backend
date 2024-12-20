@@ -2,25 +2,23 @@ package com.pawmodoro.settings.entity;
 
 /**
  * Represents the user settings for a Pawmodoro user.
- * @param userId The ID of the user.
- * @param focusDuration The duration of the focus period in minutes.
- * @param shortBreakDuration The duration of the short break period in minutes.
- * @param longBreakDuration The duration of the long break period in minutes.
- * @param autoStartBreaks Whether to automatically start breaks.
- * @param autoStartFocus Whether to automatically start focus.
  */
 public class UserSettings {
-    private final String userId;
+    public static final int DEFAULT_FOCUS_DURATION = 25;
+    public static final int DEFAULT_SHORT_BREAK_DURATION = 5;
+    public static final int DEFAULT_LONG_BREAK_DURATION = 15;
+
+    private final String username;
     private int focusDuration;
     private int shortBreakDuration;
     private int longBreakDuration;
     private boolean autoStartBreaks;
     private boolean autoStartFocus;
 
-    public UserSettings(String userId, int focusDuration, int shortBreakDuration,
+    public UserSettings(String username, int focusDuration, int shortBreakDuration,
         int longBreakDuration, boolean autoStartBreaks,
         boolean autoStartFocus) {
-        this.userId = userId;
+        this.username = username;
         this.focusDuration = focusDuration;
         this.shortBreakDuration = shortBreakDuration;
         this.longBreakDuration = longBreakDuration;
@@ -50,8 +48,8 @@ public class UserSettings {
     }
 
     // Getters
-    public String getUserId() {
-        return userId;
+    public String getUsername() {
+        return username;
     }
 
     public int getFocusDuration() {
@@ -74,46 +72,78 @@ public class UserSettings {
         return autoStartFocus;
     }
 
+    /**
+     * Builder class for creating UserSettings objects.
+     */
     public static class Builder {
-        private final String userId;
-        private int focusDuration = 25;
-        private int shortBreakDuration = 5;
-        private int longBreakDuration = 15;
-        private boolean autoStartBreaks = false;
-        private boolean autoStartFocus = false;
+        private final String username;
+        private int focusDuration = DEFAULT_FOCUS_DURATION;
+        private int shortBreakDuration = DEFAULT_SHORT_BREAK_DURATION;
+        private int longBreakDuration = DEFAULT_LONG_BREAK_DURATION;
+        private boolean autoStartBreaks;
+        private boolean autoStartFocus;
 
-        public Builder(String userId) {
-            this.userId = userId;
+        public Builder(String username) {
+            this.username = username;
         }
 
-        public Builder focusDuration(int focusDuration) {
-            this.focusDuration = focusDuration;
+        /**
+         * Sets the focus duration.
+         * @param newFocusDuration the focus duration to set
+         * @return the builder instance
+         */
+        public Builder focusDuration(int newFocusDuration) {
+            this.focusDuration = newFocusDuration;
             return this;
         }
 
-        public Builder shortBreakDuration(int shortBreakDuration) {
-            this.shortBreakDuration = shortBreakDuration;
+        /**
+         * Sets the short break duration.
+         * @param newShortBreakDuration the short break duration to set
+         * @return the builder instance
+         */
+        public Builder shortBreakDuration(int newShortBreakDuration) {
+            this.shortBreakDuration = newShortBreakDuration;
             return this;
         }
 
-        public Builder longBreakDuration(int longBreakDuration) {
-            this.longBreakDuration = longBreakDuration;
+        /**
+         * Sets the long break duration.
+         * @param newLongBreakDuration the long break duration to set
+         * @return the builder instance
+         */
+        public Builder longBreakDuration(int newLongBreakDuration) {
+            this.longBreakDuration = newLongBreakDuration;
             return this;
         }
 
-        public Builder autoStartBreaks(boolean autoStartBreaks) {
-            this.autoStartBreaks = autoStartBreaks;
+        /**
+         * Sets the auto start breaks flag.
+         * @param newAutoStartBreaks the auto start breaks flag to set
+         * @return the builder instance
+         */
+        public Builder autoStartBreaks(boolean newAutoStartBreaks) {
+            this.autoStartBreaks = newAutoStartBreaks;
             return this;
         }
 
-        public Builder autoStartFocus(boolean autoStartFocus) {
-            this.autoStartFocus = autoStartFocus;
+        /**
+         * Sets the auto start focus flag.
+         * @param newAutoStartFocus the auto start focus flag to set
+         * @return the builder instance
+         */
+        public Builder autoStartFocus(boolean newAutoStartFocus) {
+            this.autoStartFocus = newAutoStartFocus;
             return this;
         }
 
+        /**
+         * Builds the UserSettings object.
+         * @return the UserSettings object
+         */
         public UserSettings build() {
             return new UserSettings(
-                userId,
+                username,
                 focusDuration,
                 shortBreakDuration,
                 longBreakDuration,
