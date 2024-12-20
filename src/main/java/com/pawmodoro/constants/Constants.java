@@ -1,129 +1,84 @@
 package com.pawmodoro.constants;
 
-import java.awt.Font;
-
 /**
  * Constants used throughout the program.
+ * Contains HTTP headers, API endpoints, JSON field names, and error messages used in API requests and responses.
  */
 public final class Constants {
-    // Global constants
-    public static final String FONT_FAMILY = Font.SANS_SERIF;
-    // Timer constants
-    public static final int DEFAULT_WORK_MINUTES = 1;
-    public static final int DEFAULT_BREAK_MINUTES = 1;
-    public static final int MINUTES_TO_SECONDS = 60;
-    public static final int SECONDS_TO_MILLIS = 1000;
-    public static final long SECONDS_TO_MILLIS1 = 1000L;
-    public static final int DEFAULT_WORK_DURATION_MS = DEFAULT_WORK_MINUTES * MINUTES_TO_SECONDS * SECONDS_TO_MILLIS;
-    public static final int DEFAULT_BREAK_DURATION_MS = DEFAULT_BREAK_MINUTES * MINUTES_TO_SECONDS * SECONDS_TO_MILLIS;
-
-    public static final String STATUS_STOPPED = "STOPPED";
-    public static final String STATUS_RUNNING = "RUNNING";
-    public static final String INTERVAL_WORK = "WORK";
-    public static final String INTERVAL_BREAK = "BREAK";
-
-    public static final int TIMER_FONT_SIZE = 48;
-    public static final int TIMER_VERTICAL_SPACING = 20;
-    public static final String TIME_FORMAT_PATTERN = "mm:ss";
-
-    // UI Constants
-    public static final int COMPONENT_VERTICAL_SPACING = 10;
-    public static final int POPUP_FONT_SIZE = 14;
-
-    // BreakSession and StudySession Constants
-    public static final int DEFAULT_BUTTON_SIZE_W = 150;
-    public static final int DEFAULT_BUTTON_SIZE_H = 40;
-
-    // Cat Constants
-    public static final int MAX_AMOUNT_OF_CATS = 4;
-
-    // Cat Facts API Constants
-    public static final String CAT_FACT_API_URL = "https://catfact.ninja/fact";
-    public static final String CAT_FACT_ERROR_NETWORK = "Could not fetch cat fact. Check your internet connection!";
-    public static final String CAT_FACT_ERROR_API = "Could not fetch cat fact. Try again later!";
-    public static final int CAT_FACT_MAX_LENGTH = 50;
-
-    // Happiness points for study session lengths
-    public static final int POINTS_FOR_LESS_EQUAL_20 = 10;
-    public static final int POINTS_FOR_BETWEEN_21_AND_40 = 20;
-    public static final int POINTS_FOR_BETWEEN_41_AND_59 = 35;
-    public static final int POINTS_FOR_60 = 40;
-
-    // Hunger decreases for study session lengths
-    public static final int HUNGER_FOR_LESS_EQUAL_20 = 10;
-    public static final int HUNGER_FOR_BETWEEN_21_AND_40 = 20;
-    public static final int HUNGER_FOR_BETWEEN_41_AND_59 = 25;
-    public static final int HUNGER_FOR_60 = 30;
-
-    // Study intervals for points
-    public static final int MINUTES_20 = 20;
-    public static final int MINUTES_40 = 40;
-    public static final int MINUTES_60 = 60;
-
-    // Cat Image constants
-    public static final int CAT_IMAGE_MAX_WIDTH = 300;
-    public static final int CAT_IMAGE_MAX_HEIGHT = 150;
-    public static final int CAT_IMAGE_SIZE = 300;
-
-    // Signup, Login, Loggedin view model constants
-    public static final int SPACING = 40;
-    public static final int TITLE = 25;
-    public static final int INSET = 10;
-
-    public static final int DISPLAY_CAT_REFRESH_BUTTON_WIDTH = 100;
-    public static final int DISPLAY_CAT_REFRESH_BUTTON_HEIGHT = 30;
-
-    // Display cat stats view constants
-    public static final int DISPLAY_CAT_STATS_PADDING = 10;
-    public static final int DISPLAY_CAT_STATS_FONT_SIZE = 16;
-    public static final int DISPLAY_CAT_STATS_IMAGE_SIZE = 128;
-    public static final int DISPLAY_CAT_STATS_MAX_WIDTH = 360;
-    public static final int DISPLAY_CAT_STATS_HEIGHT = 360;
-
-    // Set up study session view constants
-    public static final int SETUP_SESSION_NORMAL_FONT_SIZE = 16;
-    public static final int SETUP_SESSION_TITLE_FONT_SIZE = 20;
-    // Adoption view constants
-    public static final int ADOPTION_VIEW_WIDTH = 360;
-    public static final int ADOPTION_VIEW_HEIGHT = 360;
-
-    // Runaway cat view constants
-    public static final int RUNAWAYCAT_VIEW_WIDTH = 380;
-    public static final int RUNAWAYCAT_VIEW_HEIGHT = 380;
-
-    // Cat sprite constants
-    public static final int CAT_SPRITE_BASE_SIZE = 32;
-    public static final int CAT_SPRITE_SCALE = 2;
-    public static final int CAT_SPRITE_DISPLAY_SIZE = CAT_SPRITE_BASE_SIZE * CAT_SPRITE_SCALE;
-
-    // Cat fact view constants
-    public static final int CAT_FACT_TEXT_WIDTH = 240;
-    public static final String CAT_FACT_TITLE = "Did You Know?";
-    public static final String CAT_FACT_LOADING = "Loading cat fact...";
-    public static final String CAT_FACT_ERROR_PREFIX = "Error: ";
-    public static final int CAT_FACT_FONT_SIZE = 14;
-
-    // Music Player constants
-    public static final int DEFAULT_VOLUME = 50;
-
-    // Common UI strings
-    public static final String LOADING = "Loading...";
-    public static final String NO_IMAGE_AVAILABLE = "No Image Available";
-    public static final String ERROR = "Error";
-    public static final String IMAGE_LOAD_ERROR = "Failed to load image";
-    public static final String SUCCESS = "Success";
-    public static final String CANCEL = "Cancel";
-    public static final String OK = "OK";
-
-    public static final String DEFAULT_CAT_NAME = "Pawmo";
-
-    // Adoption label
-    public static final String ADOPTION_LABEL = "Adopt a new cat!";
-
-    // Adoption panel
-    public static final int COLUMN_SIZE = 15;
-
     private Constants() {
         // Prevent instantiation
+    }
+
+    /**
+     * HTTP related constants for headers, content types, and query parameters.
+     */
+    public static final class Http {
+        public static final String CONTENT_TYPE_JSON = "application/json";
+        public static final String CONTENT_TYPE_HEADER = "Content-Type";
+        public static final String API_KEY_HEADER = "apikey";
+        public static final String AUTH_HEADER = "Authorization";
+        public static final String BEARER_PREFIX = "Bearer ";
+        public static final String PREFER_HEADER = "Prefer";
+        public static final String PREFER_REPRESENTATION = "return=representation";
+        public static final String PREFER_MINIMAL = "return=minimal";
+        public static final String QUERY_START = "?";
+        public static final String QUERY_EQUALS = "=eq.";
+
+        private Http() {
+            // Prevent instantiation
+        }
+    }
+
+    /**
+     * JSON field names used in API requests and responses for data serialization.
+     */
+    public static final class JsonFields {
+        public static final String ID_FIELD = "id";
+        public static final String EMAIL_FIELD = "email";
+        public static final String PASSWORD_FIELD = "password";
+        public static final String USERNAME_FIELD = "username";
+        public static final String ACCESS_TOKEN_FIELD = "access_token";
+        public static final String USER_FIELD = "user";
+        public static final String MSG_FIELD = "msg";
+        public static final String EMPTY_ARRAY = "[]";
+
+        private JsonFields() {
+            // Prevent instantiation
+        }
+    }
+
+    /**
+     * Supabase API endpoints for authentication and data access operations.
+     */
+    public static final class Endpoints {
+        public static final String AUTH_SIGNUP_ENDPOINT = "/auth/v1/signup";
+        public static final String AUTH_SIGNIN_ENDPOINT = "/auth/v1/token?grant_type=password";
+        public static final String AUTH_SIGNOUT_ENDPOINT = "/auth/v1/logout";
+        public static final String AUTH_PASSWORD_RESET = "/auth/v1/user/password";
+        public static final String USER_PROFILES_ENDPOINT = "/rest/v1/user_profiles";
+        public static final String AUTH_USERS_ENDPOINT = "/auth/v1/user";
+
+        private Endpoints() {
+            // Prevent instantiation
+        }
+    }
+
+    /**
+     * Error messages used throughout the application.
+     */
+    public static final class ErrorMessages {
+        // User Not Found errors
+        public static final String AUTH_USER_NOT_FOUND = "User not found: %s";
+        public static final String AUTH_PROFILE_NOT_FOUND = "User profile not found";
+
+        // Database access errors
+        public static final String AUTH_USER_NOT_AUTHENTICATED = "User not authenticated";
+        public static final String AUTH_FAILED_PASSWORD_UPDATE = "Failed to update password";
+        public static final String DB_FAILED_ACCESS = "Failed to access database";
+        public static final String DB_FAILED_CREATE_PROFILE = "Failed to create user profile: %s";
+
+        private ErrorMessages() {
+            // Prevent instantiation
+        }
     }
 }
