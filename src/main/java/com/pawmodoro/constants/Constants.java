@@ -98,6 +98,7 @@ public final class Constants {
         // Database access errors
         public static final String DB_FAILED_ACCESS = "Failed to access database";
         public static final String DB_FAILED_CREATE_PROFILE = "Failed to create user profile: %s";
+        public static final String DB_FAILED_CREATE_SETTINGS = "Failed to create user settings: %s";
         public static final String DB_FAILED_RETRIEVE_CATS = "Failed to retrieve cats: %s";
 
         private ErrorMessages() {

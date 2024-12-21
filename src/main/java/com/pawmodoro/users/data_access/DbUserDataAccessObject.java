@@ -80,35 +80,85 @@ public class DbUserDataAccessObject implements SignupUserDataAccessInterface,
                 .getString(Constants.JsonFields.ID_FIELD);
             final String accessToken = authResponse.getString(Constants.JsonFields.ACCESS_TOKEN_FIELD);
 
-            // Create the user profile with both username and email
-            final JSONObject profileBody = new JSONObject()
-                .put(Constants.JsonFields.ID_FIELD, userId)
-                .put(Constants.JsonFields.USERNAME_FIELD, user.getName())
-                .put(Constants.JsonFields.EMAIL_FIELD, user.getEmail());
-
-            final RequestBody body = RequestBody.create(
-                profileBody.toString(),
-                MediaType.parse(Constants.Http.CONTENT_TYPE_JSON));
-
-            final Request request = new Request.Builder()
-                .url(apiUrl + Constants.Endpoints.USER_PROFILES_ENDPOINT)
-                .post(body)
-                .addHeader(Constants.Http.API_KEY_HEADER, apiKey)
-                .addHeader(Constants.Http.AUTH_HEADER, Constants.Http.BEARER_PREFIX + accessToken)
-                .addHeader(Constants.Http.CONTENT_TYPE_HEADER, Constants.Http.CONTENT_TYPE_JSON)
-                .addHeader(Constants.Http.PREFER_HEADER, Constants.Http.PREFER_MINIMAL)
-                .build();
-
-            final Response response = client.newCall(request).execute();
-            final String responseBody = response.body().string();
-            // Check if creating user profile was successful
-            if (!response.isSuccessful()) {
-                throw new DatabaseAccessException(
-                    String.format(Constants.ErrorMessages.DB_FAILED_CREATE_PROFILE, responseBody));
-            }
+            // Create the user profile and settings
+            createUserProfile(user, userId, accessToken);
+            createUserSettings(userId, accessToken);
         }
         catch (IOException exception) {
             throw new DatabaseAccessException(Constants.ErrorMessages.DB_FAILED_ACCESS, exception);
+        }
+    }
+
+    /**
+     * Creates a user profile in the database.
+     * This is called automatically during user creation.
+     * @param user the user entity containing profile information
+     * @param userId the ID of the user from auth.users
+     * @param accessToken the access token for authentication
+     * @throws IOException if there is an error communicating with the database
+     * @throws DatabaseAccessException if the profile creation fails
+     */
+    private void createUserProfile(User user, String userId,
+        String accessToken) throws IOException, DatabaseAccessException {
+        final JSONObject profileBody = new JSONObject()
+            .put(Constants.JsonFields.ID_FIELD, userId)
+            .put(Constants.JsonFields.USERNAME_FIELD, user.getName())
+            .put(Constants.JsonFields.EMAIL_FIELD, user.getEmail());
+
+        final RequestBody body = RequestBody.create(
+            profileBody.toString(),
+            MediaType.parse(Constants.Http.CONTENT_TYPE_JSON));
+
+        final Request request = new Request.Builder()
+            .url(apiUrl + Constants.Endpoints.USER_PROFILES_ENDPOINT)
+            .post(body)
+            .addHeader(Constants.Http.API_KEY_HEADER, apiKey)
+            .addHeader(Constants.Http.AUTH_HEADER, Constants.Http.BEARER_PREFIX + accessToken)
+            .addHeader(Constants.Http.CONTENT_TYPE_HEADER, Constants.Http.CONTENT_TYPE_JSON)
+            .addHeader(Constants.Http.PREFER_HEADER, Constants.Http.PREFER_MINIMAL)
+            .build();
+
+        final Response response = client.newCall(request).execute();
+        final String responseBody = response.body().string();
+
+        if (!response.isSuccessful()) {
+            throw new DatabaseAccessException(
+                String.format(Constants.ErrorMessages.DB_FAILED_CREATE_PROFILE, responseBody));
+        }
+    }
+
+    /**
+     * Creates default user settings for a new user.
+     * This is called automatically during user creation.
+     * The database table has default values for all columns except id.
+     * @param userId the ID of the user to create settings for
+     * @param accessToken the access token for authentication
+     * @throws IOException if there is an error communicating with the database
+     * @throws DatabaseAccessException if the settings creation fails
+     */
+    private void createUserSettings(String userId, String accessToken) throws IOException, DatabaseAccessException {
+        final JSONObject settingsBody = new JSONObject()
+            .put(Constants.JsonFields.ID_FIELD, userId);
+
+        final RequestBody body = RequestBody.create(
+            settingsBody.toString(),
+            MediaType.parse(Constants.Http.CONTENT_TYPE_JSON));
+
+        final Request request = new Request.Builder()
+            .url(apiUrl + Constants.Endpoints.USER_SETTINGS_ENDPOINT)
+            .post(body)
+            .addHeader(Constants.Http.API_KEY_HEADER, apiKey)
+            .addHeader(Constants.Http.AUTH_HEADER, Constants.Http.BEARER_PREFIX + accessToken)
+            .addHeader(Constants.Http.CONTENT_TYPE_HEADER, Constants.Http.CONTENT_TYPE_JSON)
+            .addHeader(Constants.Http.PREFER_HEADER, Constants.Http.PREFER_MINIMAL)
+            .build();
+
+        final Response response = client.newCall(request).execute();
+        final String responseBody = response.body().string();
+
+        if (!response.isSuccessful()) {
+            throw new DatabaseAccessException(
+                String.format(Constants.ErrorMessages.DB_FAILED_CREATE_SETTINGS, responseBody));
         }
     }
 
