@@ -60,6 +60,17 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles authentication failures.
+     * @param exception Authentication exception
+     * @return Map containing error details
+     */
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(AuthenticationException.class)
+    public Map<String, String> handleAuthenticationException(AuthenticationException exception) {
+        return createErrorResponse(exception.getMessage());
+    }
+
+    /**
      * Handles user not found scenarios.
      * @param exception User not found exception
      * @return Map containing error details

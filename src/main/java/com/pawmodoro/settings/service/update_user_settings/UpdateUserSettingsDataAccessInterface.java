@@ -14,7 +14,7 @@ public interface UpdateUserSettingsDataAccessInterface {
      * @param accessToken the access token for the given username
      * @param userSettings the user settings to be updated to
      * @throws UserNotFoundException if username is invalid
-     * @throws DatabaseAccessException if data access fails
+     * @throws DatabaseAccessException if there's an error accessing the database or if authentication fails
      */
     void updateUserSettings(String username, String accessToken,
         UserSettings userSettings) throws UserNotFoundException, DatabaseAccessException;

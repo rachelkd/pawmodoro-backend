@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
+import com.pawmodoro.core.AuthenticationException;
 import com.pawmodoro.core.DatabaseAccessException;
 import com.pawmodoro.settings.entity.UserSettings;
 import com.pawmodoro.settings.service.get_user_settings.GetUserSettingsDataAccessInterface;
@@ -38,6 +39,7 @@ public class DbUserSettingsDataAccessObject
     private static final String PREFER_RETURN = "return=representation";
     private static final String EMPTY_ARRAY = "[]";
     private static final String DATABASE_ACCESS_ERROR = "Failed to access database: ";
+    private static final String INVALID_TOKEN_ERROR = "Invalid or expired access token";
     private static final int HTTP_UNAUTHORIZED = 401;
 
     // Default settings values
@@ -93,7 +95,10 @@ public class DbUserSettingsDataAccessObject
     private String executeUserProfileRequest(Request request,
         String username) throws UserNotFoundException, DatabaseAccessException {
         try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
+            if (response.code() == HTTP_UNAUTHORIZED) {
+                throw new AuthenticationException(INVALID_TOKEN_ERROR);
+            }
+            else if (!response.isSuccessful()) {
                 throw new DatabaseAccessException("Failed to get user profile: " + response.body().string());
             }
 
@@ -133,7 +138,7 @@ public class DbUserSettingsDataAccessObject
         String username) throws DatabaseAccessException {
         try (Response response = client.newCall(request).execute()) {
             if (response.code() == HTTP_UNAUTHORIZED) {
-                throw new DatabaseAccessException("Request is unauthorized: " + response.body().string());
+                throw new AuthenticationException(INVALID_TOKEN_ERROR);
             }
             else if (!response.isSuccessful()) {
                 throw new DatabaseAccessException("Failed to get user settings: " + response.body().string());
@@ -214,7 +219,7 @@ public class DbUserSettingsDataAccessObject
     private void executeUpdateSettingsRequest(Request request) throws DatabaseAccessException {
         try (Response response = client.newCall(request).execute()) {
             if (response.code() == HTTP_UNAUTHORIZED) {
-                throw new DatabaseAccessException("Request is unauthenticated: " + response.body().string());
+                throw new AuthenticationException(INVALID_TOKEN_ERROR);
             }
             else if (!response.isSuccessful()) {
                 throw new DatabaseAccessException("Failed to update user settings: " + response.body().string());
