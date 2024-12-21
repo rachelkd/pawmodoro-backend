@@ -3,6 +3,7 @@ package com.pawmodoro.users.service.signup;
 import org.springframework.stereotype.Service;
 
 import com.pawmodoro.core.DatabaseAccessException;
+import com.pawmodoro.users.entity.AuthenticationToken;
 import com.pawmodoro.users.entity.User;
 import com.pawmodoro.users.entity.UserFactory;
 import com.pawmodoro.users.service.signup.interface_adapter.SignupResponseDto;
@@ -34,7 +35,6 @@ public class SignupInteractor implements SignupInputBoundary {
 
     @Override
     public SignupResponseDto execute(SignupInputData signupInputData) throws DatabaseAccessException {
-
         if (userDataAccessObject.existsByName(signupInputData.getUsername())) {
             throw new InvalidSignupException("Username is already taken");
         }
@@ -43,9 +43,10 @@ public class SignupInteractor implements SignupInputBoundary {
             signupInputData.getUsername(),
             signupInputData.getEmail());
 
-        userDataAccessObject.save(user, signupInputData.getPassword());
+        // Save the user and get authentication tokens
+        final AuthenticationToken tokens = userDataAccessObject.save(user, signupInputData.getPassword());
 
         return signupPresenter.prepareResponse(
-            new SignupOutputData(user.getName(), signupInputData.getEmail()));
+            new SignupOutputData(user.getName(), signupInputData.getEmail(), tokens));
     }
 }

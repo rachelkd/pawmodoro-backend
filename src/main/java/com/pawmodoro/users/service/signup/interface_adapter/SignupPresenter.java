@@ -15,19 +15,6 @@ public class SignupPresenter implements SignupOutputBoundary {
 
     @Override
     public SignupResponseDto prepareResponse(SignupOutputData outputData) {
-        final SignupResponseDto response;
-        if (outputData.isSuccess()) {
-            response = new SignupResponseDto(
-                outputData.getUsername(),
-                "User successfully created with email " + outputData.getEmail(),
-                true);
-        }
-        else {
-            response = new SignupResponseDto(
-                null,
-                outputData.getError(),
-                false);
-        }
-        return response;
+        return SignupResponseDto.from(outputData.getUsername(), outputData.getTokens());
     }
 }

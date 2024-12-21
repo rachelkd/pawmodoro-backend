@@ -73,17 +73,22 @@ public class DbUserDataAccessObject implements SignupUserDataAccessInterface,
     }
 
     @Override
-    public void save(User user, String password) throws DatabaseAccessException {
+    public AuthenticationToken save(User user, String password) throws DatabaseAccessException {
         try {
             // First create the auth user
             final JSONObject authResponse = createAuthUser(user.getEmail(), password);
             final String userId = authResponse.getJSONObject(Constants.JsonFields.USER_FIELD)
                 .getString(Constants.JsonFields.ID_FIELD);
             final String accessToken = authResponse.getString(Constants.JsonFields.ACCESS_TOKEN_FIELD);
+            final String refreshToken = authResponse.getString(Constants.JsonFields.REFRESH_TOKEN_FIELD);
+            final int expiresIn = authResponse.getInt(Constants.JsonFields.EXPIRES_IN_FIELD);
+            final long expiresAt = authResponse.getLong(Constants.JsonFields.EXPIRES_AT_FIELD);
 
             // Create the user profile and settings
             createUserProfile(user, userId, accessToken);
             createUserSettings(userId, accessToken);
+
+            return new AuthenticationToken(accessToken, refreshToken, expiresIn, expiresAt);
         }
         catch (IOException exception) {
             throw new DatabaseAccessException(Constants.ErrorMessages.DB_FAILED_ACCESS, exception);
@@ -402,7 +407,8 @@ public class DbUserDataAccessObject implements SignupUserDataAccessInterface,
             final String responseBody = response.body().string();
             if (!response.isSuccessful()) {
                 throw new UserNotFoundException(parseErrorMessage(responseBody));
-                // TODO: Make new exception for invalid refresh token with 400 BAD REQUEST for Already Used and Refresh Token Not Found
+                // TODO: Make new exception for invalid refresh token with 400 BAD REQUEST for Already Used and Refresh
+                // Token Not Found
             }
 
             final JSONObject tokens = new JSONObject(responseBody);

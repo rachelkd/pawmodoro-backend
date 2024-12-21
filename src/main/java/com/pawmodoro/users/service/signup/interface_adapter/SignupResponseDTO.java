@@ -1,31 +1,32 @@
 package com.pawmodoro.users.service.signup.interface_adapter;
 
+import com.pawmodoro.users.entity.AuthenticationToken;
+
 /**
- * Data Transfer Object for signup responses.
- * Uses records for immutable data.
+ * Data Transfer Object for successful signup responses.
+ * Error cases are handled by GlobalExceptionHandler.
  * @param username the username of the newly created account
- * @param message success or error message
- * @param success whether the signup was successful
+ * @param accessToken the JWT access token
+ * @param refreshToken the JWT refresh token
+ * @param expiresIn number of seconds until the access token expires
+ * @param expiresAt timestamp when the access token expires
  */
 public record SignupResponseDto(
     String username,
-    String message,
-    boolean success) {
-    /**
-     * Creates a success response.
-     * @param username the username of the newly created account
-     * @return a success response DTO
-     */
-    public static SignupResponseDto success(String username) {
-        return new SignupResponseDto(username, "User successfully created", true);
-    }
+    String accessToken,
+    String refreshToken,
+    int expiresIn,
+    long expiresAt) {
 
     /**
-     * Creates an error response.
-     * @param message the error message
-     * @return an error response DTO
+     * Creates a signup response from authentication tokens and username.
      */
-    public static SignupResponseDto error(String message) {
-        return new SignupResponseDto(null, message, false);
+    public static SignupResponseDto from(String username, AuthenticationToken tokens) {
+        return new SignupResponseDto(
+            username,
+            tokens.accessToken(),
+            tokens.refreshToken(),
+            tokens.expiresIn(),
+            tokens.expiresAt());
     }
 }
