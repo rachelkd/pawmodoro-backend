@@ -306,22 +306,24 @@ public class DbUserDataAccessObject implements SignupUserDataAccessInterface,
 
     @Override
     public boolean logout(String accessToken) {
-        if (accessToken == null) {
-            return false;
+        boolean result = false;
+
+        if (accessToken != null) {
+            final Request request = new Request.Builder()
+                .url(apiUrl + Constants.Endpoints.AUTH_SIGNOUT_ENDPOINT)
+                .post(RequestBody.create("", MediaType.parse(Constants.Http.CONTENT_TYPE_JSON)))
+                .addHeader(Constants.Http.AUTH_HEADER, Constants.Http.BEARER_PREFIX + accessToken)
+                .addHeader(Constants.Http.API_KEY_HEADER, apiKey)
+                .build();
+
+            try (Response response = client.newCall(request).execute()) {
+                result = response.isSuccessful();
+            }
+            catch (IOException exception) {
+                result = false;
+            }
         }
 
-        final Request request = new Request.Builder()
-            .url(apiUrl + Constants.Endpoints.AUTH_SIGNOUT_ENDPOINT)
-            .post(RequestBody.create("", MediaType.parse(Constants.Http.CONTENT_TYPE_JSON)))
-            .addHeader(Constants.Http.AUTH_HEADER, Constants.Http.BEARER_PREFIX + accessToken)
-            .addHeader(Constants.Http.API_KEY_HEADER, apiKey)
-            .build();
-
-        try (Response response = client.newCall(request).execute()) {
-            return response.isSuccessful();
-        }
-        catch (IOException exception) {
-            return false;
-        }
+        return result;
     }
 }

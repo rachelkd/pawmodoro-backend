@@ -5,4 +5,6 @@ package com.pawmodoro.users.entity;
  * @param accessToken JWT access token
  * @param refreshToken JWT refresh token
  */
-public record AuthenticationToken(String accessToken, String refreshToken) {}
+public record AuthenticationToken(String accessToken, String refreshToken) {
+
+}

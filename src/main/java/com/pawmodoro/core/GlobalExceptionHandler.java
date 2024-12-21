@@ -13,6 +13,7 @@ import com.pawmodoro.cats.entity.CatAuthenticationException;
 import com.pawmodoro.cats.service.get_all_cats.InvalidGetAllCatsException;
 import com.pawmodoro.users.entity.UserNotFoundException;
 import com.pawmodoro.users.service.login.InvalidLoginException;
+import com.pawmodoro.users.service.logout.InvalidLogoutException;
 import com.pawmodoro.users.service.signup.InvalidSignupException;
 
 /**
@@ -122,6 +123,17 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(InvalidGetAllCatsException.class)
     public Map<String, String> handleInvalidGetAllCatsException(InvalidGetAllCatsException exception) {
+        return createErrorResponse(exception.getMessage());
+    }
+
+    /**
+     * Handles logout failures.
+     * @param exception Invalid logout exception
+     * @return Map containing error details
+     */
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(InvalidLogoutException.class)
+    public Map<String, String> handleInvalidLogoutException(InvalidLogoutException exception) {
         return createErrorResponse(exception.getMessage());
     }
 
