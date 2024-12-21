@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
+import com.pawmodoro.constants.Constants;
 import com.pawmodoro.core.AuthenticationException;
 import com.pawmodoro.core.DatabaseAccessException;
 import com.pawmodoro.settings.entity.UserSettings;
@@ -27,20 +28,6 @@ import okhttp3.Response;
 @Repository
 public class DbUserSettingsDataAccessObject
     implements GetUserSettingsDataAccessInterface, UpdateUserSettingsDataAccessInterface {
-
-    private static final String CONTENT_TYPE_JSON = "application/json";
-    private static final String CONTENT_TYPE_HEADER = "Content-Type";
-    private static final String API_KEY_HEADER = "apikey";
-    private static final String AUTH_HEADER = "Authorization";
-    private static final String BEARER_PREFIX = "Bearer ";
-    private static final String USER_SETTINGS_ENDPOINT = "/rest/v1/user_settings";
-    private static final String USER_PROFILES_ENDPOINT = "/rest/v1/user_profiles";
-    private static final String PREFER_HEADER = "Prefer";
-    private static final String PREFER_RETURN = "return=representation";
-    private static final String EMPTY_ARRAY = "[]";
-    private static final String DATABASE_ACCESS_ERROR = "Failed to access database: ";
-    private static final String INVALID_TOKEN_ERROR = "Invalid or expired access token";
-    private static final int HTTP_UNAUTHORIZED = 401;
 
     // Default settings values
     private static final int DEFAULT_FOCUS_DURATION = 25;
@@ -84,34 +71,37 @@ public class DbUserSettingsDataAccessObject
 
     private Request buildUserProfileRequest(String username, String accessToken) {
         return new Request.Builder()
-            .url(apiUrl + USER_PROFILES_ENDPOINT + "?username=eq." + username)
+            .url(apiUrl + Constants.Endpoints.USER_PROFILES_ENDPOINT + Constants.Http.QUERY_START
+                + Constants.JsonFields.USERNAME_FIELD + Constants.Http.QUERY_EQUALS + username)
             .get()
-            .addHeader(API_KEY_HEADER, apiKey)
-            .addHeader(AUTH_HEADER, BEARER_PREFIX + accessToken)
-            .addHeader(CONTENT_TYPE_HEADER, CONTENT_TYPE_JSON)
+            .addHeader(Constants.Http.API_KEY_HEADER, apiKey)
+            .addHeader(Constants.Http.AUTH_HEADER, Constants.Http.BEARER_PREFIX + accessToken)
+            .addHeader(Constants.Http.CONTENT_TYPE_HEADER, Constants.Http.CONTENT_TYPE_JSON)
             .build();
     }
 
     private String executeUserProfileRequest(Request request,
         String username) throws UserNotFoundException, DatabaseAccessException {
         try (Response response = client.newCall(request).execute()) {
-            if (response.code() == HTTP_UNAUTHORIZED) {
-                throw new AuthenticationException(INVALID_TOKEN_ERROR);
+            if (response.code() == Constants.StatusCodes.UNAUTHORIZED) {
+                throw new AuthenticationException(Constants.ErrorMessages.AUTH_TOKEN_INVALID);
             }
             else if (!response.isSuccessful()) {
-                throw new DatabaseAccessException("Failed to get user profile: " + response.body().string());
+                throw new DatabaseAccessException(
+                    String.format(Constants.ErrorMessages.DB_FAILED_ACCESS + ": %s", response.body().string()));
             }
 
             final String responseBody = response.body().string();
-            if (responseBody.equals(EMPTY_ARRAY)) {
-                throw new UserNotFoundException("User not found: " + username);
+            if (responseBody.equals(Constants.JsonFields.EMPTY_ARRAY)) {
+                throw new UserNotFoundException(
+                    String.format(Constants.ErrorMessages.AUTH_USER_NOT_FOUND, username));
             }
 
             final JSONArray profiles = new JSONArray(responseBody);
-            return profiles.getJSONObject(0).getString("id");
+            return profiles.getJSONObject(0).getString(Constants.JsonFields.ID_FIELD);
         }
         catch (IOException exception) {
-            throw new DatabaseAccessException(DATABASE_ACCESS_ERROR + exception.getMessage());
+            throw new DatabaseAccessException(Constants.ErrorMessages.DB_FAILED_ACCESS + ": " + exception.getMessage());
         }
     }
 
@@ -125,36 +115,38 @@ public class DbUserSettingsDataAccessObject
 
     private Request buildUserSettingsRequest(String userId, String accessToken) {
         return new Request.Builder()
-            .url(apiUrl + USER_SETTINGS_ENDPOINT + "?id=eq." + userId)
+            .url(apiUrl + Constants.Endpoints.USER_SETTINGS_ENDPOINT + Constants.Http.QUERY_START
+                + Constants.JsonFields.ID_FIELD + Constants.Http.QUERY_EQUALS + userId)
             .get()
-            .addHeader(API_KEY_HEADER, apiKey)
-            .addHeader(AUTH_HEADER, BEARER_PREFIX + accessToken)
-            .addHeader(CONTENT_TYPE_HEADER, CONTENT_TYPE_JSON)
-            .addHeader(PREFER_HEADER, PREFER_RETURN)
+            .addHeader(Constants.Http.API_KEY_HEADER, apiKey)
+            .addHeader(Constants.Http.AUTH_HEADER, Constants.Http.BEARER_PREFIX + accessToken)
+            .addHeader(Constants.Http.CONTENT_TYPE_HEADER, Constants.Http.CONTENT_TYPE_JSON)
+            .addHeader(Constants.Http.PREFER_HEADER, Constants.Http.PREFER_REPRESENTATION)
             .build();
     }
 
     private UserSettings executeUserSettingsRequest(Request request,
         String username) throws DatabaseAccessException {
         try (Response response = client.newCall(request).execute()) {
-            if (response.code() == HTTP_UNAUTHORIZED) {
-                throw new AuthenticationException(INVALID_TOKEN_ERROR);
+            if (response.code() == Constants.StatusCodes.UNAUTHORIZED) {
+                throw new AuthenticationException(Constants.ErrorMessages.AUTH_TOKEN_INVALID);
             }
             else if (!response.isSuccessful()) {
-                throw new DatabaseAccessException("Failed to get user settings: " + response.body().string());
+                throw new DatabaseAccessException(
+                    String.format(Constants.ErrorMessages.DB_FAILED_ACCESS + ": %s", response.body().string()));
             }
 
             final String responseBody = response.body().string();
             return parseUserSettings(responseBody, username);
         }
         catch (IOException exception) {
-            throw new DatabaseAccessException(DATABASE_ACCESS_ERROR + exception.getMessage());
+            throw new DatabaseAccessException(Constants.ErrorMessages.DB_FAILED_ACCESS + ": " + exception.getMessage());
         }
     }
 
     private UserSettings parseUserSettings(String responseBody, String username) {
         final UserSettings settings;
-        if (responseBody.equals(EMPTY_ARRAY)) {
+        if (responseBody.equals(Constants.JsonFields.EMPTY_ARRAY)) {
             settings = createDefaultSettings(username);
         }
         else {
@@ -178,11 +170,11 @@ public class DbUserSettingsDataAccessObject
     private UserSettings createUserSettings(String username, JSONObject settings) {
         return new UserSettings(
             username,
-            settings.getInt("focus_duration"),
-            settings.getInt("short_break_duration"),
-            settings.getInt("long_break_duration"),
-            settings.getBoolean("auto_start_breaks"),
-            settings.getBoolean("auto_start_focus"));
+            settings.getInt(Constants.JsonFields.FOCUS_DURATION),
+            settings.getInt(Constants.JsonFields.SHORT_BREAK_DURATION),
+            settings.getInt(Constants.JsonFields.LONG_BREAK_DURATION),
+            settings.getBoolean(Constants.JsonFields.AUTO_START_BREAKS),
+            settings.getBoolean(Constants.JsonFields.AUTO_START_FOCUS));
     }
 
     @Override
@@ -195,38 +187,40 @@ public class DbUserSettingsDataAccessObject
 
     private Request buildUpdateSettingsRequest(String id, String accessToken, UserSettings userSettings) {
         final JSONObject requestBody = new JSONObject()
-            .put("id", id)
-            .put("focus_duration", userSettings.getFocusDuration())
-            .put("short_break_duration", userSettings.getShortBreakDuration())
-            .put("long_break_duration", userSettings.getLongBreakDuration())
-            .put("auto_start_breaks", userSettings.isAutoStartBreaks())
-            .put("auto_start_focus", userSettings.isAutoStartFocus());
+            .put(Constants.JsonFields.ID_FIELD, id)
+            .put(Constants.JsonFields.FOCUS_DURATION, userSettings.getFocusDuration())
+            .put(Constants.JsonFields.SHORT_BREAK_DURATION, userSettings.getShortBreakDuration())
+            .put(Constants.JsonFields.LONG_BREAK_DURATION, userSettings.getLongBreakDuration())
+            .put(Constants.JsonFields.AUTO_START_BREAKS, userSettings.isAutoStartBreaks())
+            .put(Constants.JsonFields.AUTO_START_FOCUS, userSettings.isAutoStartFocus());
 
         final RequestBody body = RequestBody.create(
             requestBody.toString(),
-            MediaType.parse(CONTENT_TYPE_JSON));
+            MediaType.parse(Constants.Http.CONTENT_TYPE_JSON));
 
         return new Request.Builder()
-            .url(apiUrl + USER_SETTINGS_ENDPOINT + "?id=eq." + id)
+            .url(apiUrl + Constants.Endpoints.USER_SETTINGS_ENDPOINT + Constants.Http.QUERY_START
+                + Constants.JsonFields.ID_FIELD + Constants.Http.QUERY_EQUALS + id)
             .patch(body)
-            .addHeader(API_KEY_HEADER, apiKey)
-            .addHeader(AUTH_HEADER, BEARER_PREFIX + accessToken)
-            .addHeader(CONTENT_TYPE_HEADER, CONTENT_TYPE_JSON)
-            .addHeader(PREFER_HEADER, PREFER_RETURN)
+            .addHeader(Constants.Http.API_KEY_HEADER, apiKey)
+            .addHeader(Constants.Http.AUTH_HEADER, Constants.Http.BEARER_PREFIX + accessToken)
+            .addHeader(Constants.Http.CONTENT_TYPE_HEADER, Constants.Http.CONTENT_TYPE_JSON)
+            .addHeader(Constants.Http.PREFER_HEADER, Constants.Http.PREFER_REPRESENTATION)
             .build();
     }
 
     private void executeUpdateSettingsRequest(Request request) throws DatabaseAccessException {
         try (Response response = client.newCall(request).execute()) {
-            if (response.code() == HTTP_UNAUTHORIZED) {
-                throw new AuthenticationException(INVALID_TOKEN_ERROR);
+            if (response.code() == Constants.StatusCodes.UNAUTHORIZED) {
+                throw new AuthenticationException(Constants.ErrorMessages.AUTH_TOKEN_INVALID);
             }
             else if (!response.isSuccessful()) {
-                throw new DatabaseAccessException("Failed to update user settings: " + response.body().string());
+                throw new DatabaseAccessException(
+                    String.format(Constants.ErrorMessages.DB_FAILED_ACCESS + ": %s", response.body().string()));
             }
         }
         catch (IOException exception) {
-            throw new DatabaseAccessException(DATABASE_ACCESS_ERROR + exception.getMessage());
+            throw new DatabaseAccessException(Constants.ErrorMessages.DB_FAILED_ACCESS + ": " + exception.getMessage());
         }
     }
 }

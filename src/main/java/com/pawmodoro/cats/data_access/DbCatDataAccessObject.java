@@ -12,10 +12,10 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.pawmodoro.cats.entity.Cat;
-import com.pawmodoro.cats.entity.CatAuthenticationException;
 import com.pawmodoro.cats.entity.CatFactory;
 import com.pawmodoro.cats.service.get_all_cats.GetAllCatsDataAccessInterface;
 import com.pawmodoro.constants.Constants;
+import com.pawmodoro.core.AuthenticationException;
 import com.pawmodoro.core.DatabaseAccessException;
 import jakarta.servlet.http.HttpServletRequest;
 import okhttp3.OkHttpClient;
@@ -52,15 +52,14 @@ public class DbCatDataAccessObject implements GetAllCatsDataAccessInterface {
     }
 
     @Override
-    public Collection<Cat> getCatsByOwner(
-        String ownerUsername) throws DatabaseAccessException, CatAuthenticationException {
+    public Collection<Cat> getCatsByOwner(String ownerUsername) throws DatabaseAccessException {
         // Get the authorization token from the current request
         final HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
             .getRequest();
         final String authToken = request.getHeader(Constants.Http.AUTH_HEADER);
 
         if (authToken == null || !authToken.startsWith(Constants.Http.BEARER_PREFIX)) {
-            throw new CatAuthenticationException(Constants.ErrorMessages.AUTH_TOKEN_REQUIRED);
+            throw new AuthenticationException(Constants.ErrorMessages.AUTH_TOKEN_REQUIRED);
         }
 
         final Collection<Cat> cats = new ArrayList<>();
@@ -78,7 +77,7 @@ public class DbCatDataAccessObject implements GetAllCatsDataAccessInterface {
 
             if (!response.isSuccessful()) {
                 if (response.code() == Constants.StatusCodes.UNAUTHORIZED) {
-                    throw new CatAuthenticationException(Constants.ErrorMessages.AUTH_TOKEN_INVALID);
+                    throw new AuthenticationException(Constants.ErrorMessages.AUTH_TOKEN_INVALID);
                 }
                 throw new DatabaseAccessException(
                     String.format(Constants.ErrorMessages.DB_FAILED_RETRIEVE_CATS, response.message()));

@@ -50,6 +50,13 @@ public final class Constants {
         public static final String HUNGER_LEVEL = "hunger_level";
         public static final String IMAGE_FILE_NAME = "image_file_name";
 
+        // Settings-related fields
+        public static final String FOCUS_DURATION = "focus_duration";
+        public static final String SHORT_BREAK_DURATION = "short_break_duration";
+        public static final String LONG_BREAK_DURATION = "long_break_duration";
+        public static final String AUTO_START_BREAKS = "auto_start_breaks";
+        public static final String AUTO_START_FOCUS = "auto_start_focus";
+
         private JsonFields() {
             // Prevent instantiation
         }
@@ -64,6 +71,7 @@ public final class Constants {
         public static final String AUTH_SIGNOUT_ENDPOINT = "/auth/v1/logout";
         public static final String AUTH_PASSWORD_RESET = "/auth/v1/user/password";
         public static final String USER_PROFILES_ENDPOINT = "/rest/v1/user_profiles";
+        public static final String USER_SETTINGS_ENDPOINT = "/rest/v1/user_settings";
         public static final String AUTH_USERS_ENDPOINT = "/auth/v1/user";
         public static final String CATS_ENDPOINT = "/rest/v1/cats";
 
@@ -84,7 +92,7 @@ public final class Constants {
         public static final String AUTH_USER_NOT_AUTHENTICATED = "User not authenticated";
         public static final String AUTH_FAILED_PASSWORD_UPDATE = "Failed to update password";
         public static final String AUTH_TOKEN_REQUIRED = "Authorization token is required";
-        public static final String AUTH_TOKEN_INVALID = "Invalid authorization token";
+        public static final String AUTH_TOKEN_INVALID = "Invalid or expired access token";
 
         // Database access errors
         public static final String DB_FAILED_ACCESS = "Failed to access database";
