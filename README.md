@@ -80,6 +80,63 @@ Content-Type: application/json
 }
 ```
 
+#### Logout
+```http
+POST /api/users/logout
+Authorization: Bearer <token>
+```
+
+**Responses:**
+- `200 OK`: Logout successful
+```json
+{
+    "success": true,
+    "message": "Successfully logged out"
+}
+```
+- `401 UNAUTHORIZED`: Invalid or expired token
+```json
+{
+    "message": "Invalid or expired access token"
+}
+```
+
+#### Refresh Token
+```http
+POST /api/users/refresh
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+    "refreshToken": "string"
+}
+```
+
+**Responses:**
+- `200 OK`: Token refresh successful
+```json
+{
+    "accessToken": "string",
+    "refreshToken": "string",
+    "expiresIn": number,
+    "expiresAt": number
+}
+```
+- `404 NOT FOUND`: Invalid refresh token
+```json
+{
+    "message": "Invalid Refresh Token: Refresh Token Not Found"
+}
+```
+
+```json
+{
+    "message": "Invalid Refresh Token: Already Used"
+}
+```
+
 ### User Settings
 
 #### Get User Settings
