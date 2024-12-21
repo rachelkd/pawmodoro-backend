@@ -1,21 +1,23 @@
 package com.pawmodoro.users.service.login;
 
 import com.pawmodoro.core.DatabaseAccessException;
+import com.pawmodoro.users.entity.AuthenticatedUser;
 import com.pawmodoro.users.entity.User;
 import com.pawmodoro.users.entity.UserNotFoundException;
 
 /**
  * Interface for user authentication data access.
- * This interface defines the contract for user authentication operations.
  */
 public interface LoginUserDataAccessInterface {
     /**
-     * Checks if a user exists by their username.
-     * @param username the username to check
-     * @return true if the user exists, false otherwise
-     * @throws DatabaseAccessException if there is an error accessing the database
+     * Authenticates a user with their email and password.
+     * @param email the user's email
+     * @param password the user's password
+     * @return AuthenticatedUser containing the user and their tokens
+     * @throws DatabaseAccessException if authentication fails
+     * @throws UserNotFoundException if the user is not found
      */
-    boolean existsByName(String username) throws DatabaseAccessException;
+    AuthenticatedUser authenticate(String email, String password) throws DatabaseAccessException, UserNotFoundException;
 
     /**
      * Retrieves a user by their username.
@@ -27,18 +29,10 @@ public interface LoginUserDataAccessInterface {
     User get(String username) throws UserNotFoundException, DatabaseAccessException;
 
     /**
-     * Authenticates a user with their email and password.
-     * @param email the user's email
-     * @param password the user's password
-     * @return the authenticated User object
-     * @throws DatabaseAccessException if authentication fails or there is a database error
-     * @throws UserNotFoundException if the user is not found
+     * Checks if a user exists by their username.
+     * @param username the username to check
+     * @return true if the user exists, false otherwise
+     * @throws DatabaseAccessException if there is an error accessing the database
      */
-    User authenticate(String email, String password) throws DatabaseAccessException, UserNotFoundException;
-
-    /**
-     * Gets the access token from the most recent successful authentication.
-     * @return the Supabase access token
-     */
-    String getAccessToken();
+    boolean existsByName(String username) throws DatabaseAccessException;
 }

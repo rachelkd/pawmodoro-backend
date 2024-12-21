@@ -39,6 +39,7 @@ public final class Constants {
         public static final String PASSWORD_FIELD = "password";
         public static final String USERNAME_FIELD = "username";
         public static final String ACCESS_TOKEN_FIELD = "access_token";
+        public static final String REFRESH_TOKEN_FIELD = "refresh_token";
         public static final String USER_FIELD = "user";
         public static final String MSG_FIELD = "msg";
         public static final String EMPTY_ARRAY = "[]";

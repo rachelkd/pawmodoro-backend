@@ -3,6 +3,7 @@ package com.pawmodoro.users.service.login;
 import org.springframework.stereotype.Service;
 
 import com.pawmodoro.core.DatabaseAccessException;
+import com.pawmodoro.users.entity.AuthenticatedUser;
 import com.pawmodoro.users.entity.User;
 import com.pawmodoro.users.entity.UserNotFoundException;
 import com.pawmodoro.users.service.login.interface_adapter.LoginResponseDto;
@@ -30,45 +31,21 @@ public class LoginInteractor implements LoginInputBoundary {
 
     @Override
     public LoginResponseDto execute(
-        LoginInputData loginInputData) throws DatabaseAccessException, UserNotFoundException {
-        validateInput(loginInputData);
-
+        LoginInputData loginInputData) throws UserNotFoundException, DatabaseAccessException {
         // Get user by username to get their email
         final User user = userDataAccessObject.get(loginInputData.username());
 
         try {
             // Authenticate with Supabase using email and password
-            final User authenticatedUser = userDataAccessObject.authenticate(
+            final AuthenticatedUser authenticatedUser = userDataAccessObject.authenticate(
                 user.getEmail(),
                 loginInputData.password());
 
-            // Get the access token from the successful authentication
-            final String token = userDataAccessObject.getAccessToken();
-
-            return prepareSuccessResponse(authenticatedUser.getName(), token);
+            return loginPresenter.prepareResponse(
+                new LoginOutputData(authenticatedUser.user().getName(), authenticatedUser.tokens()));
         }
         catch (UserNotFoundException exception) {
             throw new InvalidLoginException("Wrong password");
-        }
-    }
-
-    /**
-     * Prepares a success response with the authenticated user's information.
-     * @param username the authenticated username
-     * @param token the authentication token
-     * @return formatted login response
-     */
-    private LoginResponseDto prepareSuccessResponse(String username, String token) {
-        return loginPresenter.prepareResponse(
-            new LoginOutputData(username, token));
-    }
-
-    private void validateInput(LoginInputData data) {
-        if (data.username() == null || data.username().trim().isEmpty()) {
-            throw new InvalidLoginException("Username is required");
-        }
-        if (data.password() == null || data.password().trim().isEmpty()) {
-            throw new InvalidLoginException("Password is required");
         }
     }
 }

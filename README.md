@@ -29,9 +29,8 @@ Content-Type: application/json
 - `200 OK`: Login successful
 ```json
 {
-    "success": true,
-    "token": "string",
-    "message": "Login successful",
+    "accessToken": "string",
+    "refreshToken": "string",
     "username": "string"
 }
 ```

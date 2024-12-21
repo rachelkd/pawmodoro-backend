@@ -1,11 +1,10 @@
 package com.pawmodoro.users.service.login;
 
-import com.pawmodoro.core.DatabaseAccessException;
-import com.pawmodoro.users.entity.CommonUserFactory;
-import com.pawmodoro.users.entity.User;
-import com.pawmodoro.users.entity.UserFactory;
-import com.pawmodoro.users.entity.UserNotFoundException;
-import com.pawmodoro.users.service.login.interface_adapter.LoginResponseDto;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,11 +12,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
+import com.pawmodoro.core.DatabaseAccessException;
+import com.pawmodoro.users.entity.AuthenticatedUser;
+import com.pawmodoro.users.entity.AuthenticationToken;
+import com.pawmodoro.users.entity.CommonUserFactory;
+import com.pawmodoro.users.entity.User;
+import com.pawmodoro.users.entity.UserFactory;
+import com.pawmodoro.users.entity.UserNotFoundException;
+import com.pawmodoro.users.service.login.interface_adapter.LoginResponseDto;
 
 @ExtendWith(MockitoExtension.class)
 class LoginInteractorTest {
@@ -38,19 +40,22 @@ class LoginInteractorTest {
     }
 
     @Test
-    void execute_WithValidCredentials_ReturnsSuccessResponse() throws DatabaseAccessException, UserNotFoundException {
+    void executeWithValidCredentialsReturnsSuccessResponse() throws DatabaseAccessException, UserNotFoundException {
         // Arrange
-        LoginInputData inputData = new LoginInputData("testuser", "password123");
-        User user = userFactory.create("testuser", "test@example.com");
-        LoginResponseDto expectedResponse = new LoginResponseDto(true, "token123", "Login successful", "testuser");
+        final LoginInputData inputData = new LoginInputData("testuser", "password123");
+        final User user = userFactory.create("testuser", "test@example.com");
+        final AuthenticationToken tokens = new AuthenticationToken("token123", "refresh123");
+        final AuthenticatedUser authenticatedUser = new AuthenticatedUser(user, tokens);
+        final LoginResponseDto expectedResponse = LoginResponseDto.from("testuser", tokens);
 
         when(mockUserDataAccess.get("testuser")).thenReturn(user);
-        when(mockUserDataAccess.authenticate("test@example.com", "password123")).thenReturn(user);
-        when(mockUserDataAccess.getAccessToken()).thenReturn("token123");
-        when(mockLoginPresenter.prepareResponse(any(LoginOutputData.class))).thenReturn(expectedResponse);
+        when(mockUserDataAccess.authenticate("test@example.com", "password123"))
+            .thenReturn(authenticatedUser);
+        when(mockLoginPresenter.prepareResponse(any(LoginOutputData.class)))
+            .thenReturn(expectedResponse);
 
         // Act
-        LoginResponseDto response = loginInteractor.execute(inputData);
+        final LoginResponseDto response = loginInteractor.execute(inputData);
 
         // Assert
         assertEquals(expectedResponse, response);
@@ -59,68 +64,46 @@ class LoginInteractorTest {
     }
 
     @Test
-    void execute_WithNonexistentUser_ThrowsUserNotFoundException() throws DatabaseAccessException, UserNotFoundException {
+    void executeWithNonexistentUserThrowsException() throws DatabaseAccessException, UserNotFoundException {
         // Arrange
-        LoginInputData inputData = new LoginInputData("nonexistent", "password123");
+        final LoginInputData inputData = new LoginInputData("nonexistent", "password123");
 
         when(mockUserDataAccess.get("nonexistent"))
             .thenThrow(new UserNotFoundException("User not found"));
 
         // Act & Assert
-        UserNotFoundException exception = assertThrows(UserNotFoundException.class,
+        final UserNotFoundException exception = assertThrows(UserNotFoundException.class,
             () -> loginInteractor.execute(inputData));
         assertEquals("User not found", exception.getMessage());
     }
 
     @Test
-    void execute_WithIncorrectPassword_ThrowsUserNotFoundException() throws DatabaseAccessException, UserNotFoundException {
+    void executeWithIncorrectPasswordThrowsException() throws DatabaseAccessException, UserNotFoundException {
         // Arrange
-        LoginInputData inputData = new LoginInputData("testuser", "wrongpassword");
-        User user = userFactory.create("testuser", "test@example.com");
+        final LoginInputData inputData = new LoginInputData("testuser", "wrongpassword");
+        final User user = userFactory.create("testuser", "test@example.com");
 
         when(mockUserDataAccess.get("testuser")).thenReturn(user);
         when(mockUserDataAccess.authenticate("test@example.com", "wrongpassword"))
-            .thenThrow(new UserNotFoundException("Authentication failed"));
+            .thenThrow(new UserNotFoundException("Wrong password"));
 
         // Act & Assert
-        InvalidLoginException exception = assertThrows(InvalidLoginException.class,
+        final InvalidLoginException exception = assertThrows(InvalidLoginException.class,
             () -> loginInteractor.execute(inputData));
         assertEquals("Wrong password", exception.getMessage());
     }
 
     @Test
-    void execute_WithDatabaseError_ThrowsDatabaseAccessException() throws DatabaseAccessException, UserNotFoundException {
+    void executeWithDatabaseErrorThrowsException() throws DatabaseAccessException, UserNotFoundException {
         // Arrange
-        LoginInputData inputData = new LoginInputData("testuser", "password123");
+        final LoginInputData inputData = new LoginInputData("testuser", "password123");
 
         when(mockUserDataAccess.get("testuser"))
             .thenThrow(new DatabaseAccessException("Database error"));
 
         // Act & Assert
-        DatabaseAccessException exception = assertThrows(DatabaseAccessException.class,
+        final DatabaseAccessException exception = assertThrows(DatabaseAccessException.class,
             () -> loginInteractor.execute(inputData));
         assertEquals("Database error", exception.getMessage());
-    }
-
-    @Test
-    void execute_WithEmptyUsername_ThrowsInvalidLoginException() {
-        // Arrange
-        LoginInputData inputData = new LoginInputData("", "password123");
-
-        // Act & Assert
-        InvalidLoginException exception = assertThrows(InvalidLoginException.class,
-            () -> loginInteractor.execute(inputData));
-        assertEquals("Username is required", exception.getMessage());
-    }
-
-    @Test
-    void execute_WithEmptyPassword_ThrowsInvalidLoginException() {
-        // Arrange
-        LoginInputData inputData = new LoginInputData("testuser", "");
-
-        // Act & Assert
-        InvalidLoginException exception = assertThrows(InvalidLoginException.class,
-            () -> loginInteractor.execute(inputData));
-        assertEquals("Password is required", exception.getMessage());
     }
 }

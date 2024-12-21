@@ -14,13 +14,8 @@ public class LoginPresenter implements LoginOutputBoundary {
 
     @Override
     public LoginResponseDto prepareResponse(LoginOutputData outputData) {
-        final LoginResponseDto response;
-        if (outputData.isSuccess()) {
-            response = new LoginResponseDto(true, outputData.getToken(), "Login successful", outputData.getUsername());
-        }
-        else {
-            response = new LoginResponseDto(false, null, outputData.getError(), null);
-        }
-        return response;
+        return LoginResponseDto.from(
+            outputData.getUsername(),
+            outputData.getTokens());
     }
 }
