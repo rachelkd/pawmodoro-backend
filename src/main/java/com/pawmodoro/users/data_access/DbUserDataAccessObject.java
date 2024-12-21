@@ -402,6 +402,7 @@ public class DbUserDataAccessObject implements SignupUserDataAccessInterface,
             final String responseBody = response.body().string();
             if (!response.isSuccessful()) {
                 throw new UserNotFoundException(parseErrorMessage(responseBody));
+                // TODO: Make new exception for invalid refresh token with 400 BAD REQUEST for Already Used and Refresh Token Not Found
             }
 
             final JSONObject tokens = new JSONObject(responseBody);
