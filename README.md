@@ -81,6 +81,82 @@ Content-Type: application/json
 }
 ```
 
+### User Settings
+
+#### Get User Settings
+```http
+GET /api/settings/{username}
+Authorization: Bearer <token>
+```
+
+**Responses:**
+- `200 OK`: Successfully retrieved settings
+```json
+{
+    "username": "string",
+    "focusDuration": number,
+    "shortBreakDuration": number,
+    "longBreakDuration": number,
+    "autoStartBreaks": boolean,
+    "autoStartFocus": boolean
+}
+```
+- `401 UNAUTHORIZED`: Invalid or expired token
+```json
+{
+    "message": "Invalid or expired access token"
+}
+```
+- `404 NOT_FOUND`: User not found
+```json
+{
+    "message": "User not found: username"
+}
+```
+
+#### Update User Settings
+```http
+PUT /api/settings/{username}
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+    "focusDuration": number,
+    "shortBreakDuration": number,
+    "longBreakDuration": number,
+    "autoStartBreaks": boolean,
+    "autoStartFocus": boolean
+}
+```
+
+**Responses:**
+- `200 OK`: Settings updated successfully
+```json
+{
+    "username": "string",
+    "focusDuration": number,
+    "shortBreakDuration": number,
+    "longBreakDuration": number,
+    "autoStartBreaks": boolean,
+    "autoStartFocus": boolean
+}
+```
+- `401 UNAUTHORIZED`: Invalid or expired token
+```json
+{
+    "message": "Invalid or expired access token"
+}
+```
+- `404 NOT_FOUND`: User not found
+```json
+{
+    "message": "User not found: username"
+}
+```
+
 ### Cats
 
 #### Get All Cats
