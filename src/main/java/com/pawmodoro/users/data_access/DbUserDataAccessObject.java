@@ -17,6 +17,7 @@ import com.pawmodoro.users.entity.UserFactory;
 import com.pawmodoro.users.entity.UserNotFoundException;
 import com.pawmodoro.users.service.login.LoginUserDataAccessInterface;
 import com.pawmodoro.users.service.logout.LogoutUserDataAccessInterface;
+import com.pawmodoro.users.service.refresh.RefreshTokenDataAccessInterface;
 import com.pawmodoro.users.service.signup.SignupUserDataAccessInterface;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -29,7 +30,7 @@ import okhttp3.Response;
  */
 @Repository
 public class DbUserDataAccessObject implements SignupUserDataAccessInterface,
-    LoginUserDataAccessInterface, LogoutUserDataAccessInterface {
+    LoginUserDataAccessInterface, LogoutUserDataAccessInterface, RefreshTokenDataAccessInterface {
 
     private final OkHttpClient client;
     private final String apiUrl;
@@ -375,5 +376,38 @@ public class DbUserDataAccessObject implements SignupUserDataAccessInterface,
         }
 
         return result;
+    }
+
+    @Override
+    public AuthenticationToken refreshTokens(
+        String refreshToken) throws DatabaseAccessException, UserNotFoundException {
+        final JSONObject refreshBody = new JSONObject()
+            .put(Constants.JsonFields.REFRESH_TOKEN_FIELD, refreshToken);
+
+        final RequestBody body = RequestBody.create(
+            refreshBody.toString(),
+            MediaType.parse(Constants.Http.CONTENT_TYPE_JSON));
+
+        final Request request = new Request.Builder()
+            .url(apiUrl + Constants.Endpoints.AUTH_REFRESH_ENDPOINT)
+            .post(body)
+            .addHeader(Constants.Http.API_KEY_HEADER, apiKey)
+            .addHeader(Constants.Http.CONTENT_TYPE_HEADER, Constants.Http.CONTENT_TYPE_JSON)
+            .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            final String responseBody = response.body().string();
+            if (!response.isSuccessful()) {
+                throw new UserNotFoundException(parseErrorMessage(responseBody));
+            }
+
+            final JSONObject tokens = new JSONObject(responseBody);
+            return new AuthenticationToken(
+                tokens.getString(Constants.JsonFields.ACCESS_TOKEN_FIELD),
+                tokens.getString(Constants.JsonFields.REFRESH_TOKEN_FIELD));
+        }
+        catch (IOException exception) {
+            throw new DatabaseAccessException(Constants.ErrorMessages.DB_FAILED_ACCESS, exception);
+        }
     }
 }

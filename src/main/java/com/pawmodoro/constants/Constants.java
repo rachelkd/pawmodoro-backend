@@ -71,6 +71,7 @@ public final class Constants {
         public static final String AUTH_SIGNIN_ENDPOINT = "/auth/v1/token?grant_type=password";
         public static final String AUTH_SIGNOUT_ENDPOINT = "/auth/v1/logout";
         public static final String AUTH_PASSWORD_RESET = "/auth/v1/user/password";
+        public static final String AUTH_REFRESH_ENDPOINT = "/auth/v1/token?grant_type=refresh_token";
         public static final String USER_PROFILES_ENDPOINT = "/rest/v1/user_profiles";
         public static final String USER_SETTINGS_ENDPOINT = "/rest/v1/user_settings";
         public static final String AUTH_USERS_ENDPOINT = "/auth/v1/user";
@@ -85,6 +86,9 @@ public final class Constants {
      * Error messages used throughout the application.
      */
     public static final class ErrorMessages {
+        // Format strings
+        public static final String ERROR_MESSAGE_FORMAT = ": %s";
+
         // User Not Found errors
         public static final String AUTH_USER_NOT_FOUND = "User not found: %s";
         public static final String AUTH_PROFILE_NOT_FOUND = "User profile not found";

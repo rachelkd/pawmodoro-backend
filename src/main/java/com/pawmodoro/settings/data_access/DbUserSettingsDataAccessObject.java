@@ -88,7 +88,9 @@ public class DbUserSettingsDataAccessObject
             }
             else if (!response.isSuccessful()) {
                 throw new DatabaseAccessException(
-                    String.format(Constants.ErrorMessages.DB_FAILED_ACCESS + ": %s", response.body().string()));
+                    String.format(
+                        Constants.ErrorMessages.DB_FAILED_ACCESS + Constants.ErrorMessages.ERROR_MESSAGE_FORMAT,
+                        response.body().string()));
             }
 
             final String responseBody = response.body().string();
@@ -101,7 +103,10 @@ public class DbUserSettingsDataAccessObject
             return profiles.getJSONObject(0).getString(Constants.JsonFields.ID_FIELD);
         }
         catch (IOException exception) {
-            throw new DatabaseAccessException(Constants.ErrorMessages.DB_FAILED_ACCESS + ": " + exception.getMessage());
+            throw new DatabaseAccessException(
+                String.format(
+                    Constants.ErrorMessages.DB_FAILED_ACCESS + Constants.ErrorMessages.ERROR_MESSAGE_FORMAT,
+                    exception.getMessage()));
         }
     }
 
@@ -133,7 +138,9 @@ public class DbUserSettingsDataAccessObject
             }
             else if (!response.isSuccessful()) {
                 throw new DatabaseAccessException(
-                    String.format(Constants.ErrorMessages.DB_FAILED_ACCESS + ": %s", response.body().string()));
+                    String.format(
+                        Constants.ErrorMessages.DB_FAILED_ACCESS + Constants.ErrorMessages.ERROR_MESSAGE_FORMAT,
+                        response.body().string()));
             }
 
             final String responseBody = response.body().string();
@@ -216,7 +223,9 @@ public class DbUserSettingsDataAccessObject
             }
             else if (!response.isSuccessful()) {
                 throw new DatabaseAccessException(
-                    String.format(Constants.ErrorMessages.DB_FAILED_ACCESS + ": %s", response.body().string()));
+                    String.format(
+                        Constants.ErrorMessages.DB_FAILED_ACCESS + Constants.ErrorMessages.ERROR_MESSAGE_FORMAT,
+                        response.body().string()));
             }
         }
         catch (IOException exception) {

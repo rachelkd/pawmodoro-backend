@@ -8,4 +8,6 @@ package com.pawmodoro.users.service.login;
  */
 public record LoginInputData(
     String username,
-    String password) {}
+    String password) {
+
+}
