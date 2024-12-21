@@ -43,6 +43,8 @@ public final class Constants {
         public static final String USER_FIELD = "user";
         public static final String MSG_FIELD = "msg";
         public static final String EMPTY_ARRAY = "[]";
+        public static final String EXPIRES_IN_FIELD = "expires_in";
+        public static final String EXPIRES_AT_FIELD = "expires_at";
 
         // Cat-related fields
         public static final String CAT_NAME = "cat_name";

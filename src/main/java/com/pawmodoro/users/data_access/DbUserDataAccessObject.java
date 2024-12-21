@@ -249,10 +249,13 @@ public class DbUserDataAccessObject implements SignupUserDataAccessInterface,
         String password) throws DatabaseAccessException, UserNotFoundException {
         final JSONObject authResponse = authenticateUser(email, password);
 
-        // Extract tokens
+        // Extract tokens and expiration info
         final String accessToken = authResponse.getString(Constants.JsonFields.ACCESS_TOKEN_FIELD);
         final String refreshToken = authResponse.getString(Constants.JsonFields.REFRESH_TOKEN_FIELD);
-        final AuthenticationToken tokens = new AuthenticationToken(accessToken, refreshToken);
+        final int expiresIn = authResponse.getInt(Constants.JsonFields.EXPIRES_IN_FIELD);
+        final long expiresAt = authResponse.getLong(Constants.JsonFields.EXPIRES_AT_FIELD);
+        final AuthenticationToken tokens = new AuthenticationToken(
+            accessToken, refreshToken, expiresIn, expiresAt);
 
         // Get user info
         final JSONObject userInfo = authResponse.getJSONObject(Constants.JsonFields.USER_FIELD);
@@ -404,7 +407,9 @@ public class DbUserDataAccessObject implements SignupUserDataAccessInterface,
             final JSONObject tokens = new JSONObject(responseBody);
             return new AuthenticationToken(
                 tokens.getString(Constants.JsonFields.ACCESS_TOKEN_FIELD),
-                tokens.getString(Constants.JsonFields.REFRESH_TOKEN_FIELD));
+                tokens.getString(Constants.JsonFields.REFRESH_TOKEN_FIELD),
+                tokens.getInt(Constants.JsonFields.EXPIRES_IN_FIELD),
+                tokens.getLong(Constants.JsonFields.EXPIRES_AT_FIELD));
         }
         catch (IOException exception) {
             throw new DatabaseAccessException(Constants.ErrorMessages.DB_FAILED_ACCESS, exception);
