@@ -6,6 +6,9 @@ import com.pawmodoro.cats.entity.Cat;
 import com.pawmodoro.cats.entity.CatAuthenticationException;
 import com.pawmodoro.core.DatabaseAccessException;
 
+/**
+ * Interface for data access operations related to retrieving all cats owned by a user.
+ */
 public interface GetAllCatsDataAccessInterface {
     /**
      * Retrieves all cats owned by a specific user.

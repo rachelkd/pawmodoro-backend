@@ -3,7 +3,7 @@ package com.pawmodoro.cats.service.get_all_cats;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.pawmodoro.cats.service.get_all_cats.interface_adapter.GetAllCatsResponseDTO;
+import com.pawmodoro.cats.service.get_all_cats.interface_adapter.GetAllCatsResponseDto;
 
 /**
  * Exception thrown when get all cats validation fails.
@@ -12,7 +12,7 @@ import com.pawmodoro.cats.service.get_all_cats.interface_adapter.GetAllCatsRespo
  */
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class InvalidGetAllCatsException extends RuntimeException {
-    private final transient GetAllCatsResponseDTO response;
+    private final transient GetAllCatsResponseDto response;
 
     /**
      * Constructs an InvalidGetAllCatsException with an error message.
@@ -20,14 +20,14 @@ public class InvalidGetAllCatsException extends RuntimeException {
      */
     public InvalidGetAllCatsException(String message) {
         super(message);
-        this.response = new GetAllCatsResponseDTO(false, null, message);
+        this.response = new GetAllCatsResponseDto(false, null, message);
     }
 
     /**
      * Gets the response DTO containing error details.
      * @return the error response DTO
      */
-    public GetAllCatsResponseDTO getResponse() {
+    public GetAllCatsResponseDto getResponse() {
         return response;
     }
 }

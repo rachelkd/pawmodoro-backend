@@ -1,6 +1,7 @@
 package com.pawmodoro.cats.service.get_all_cats.interface_adapter;
 
 import org.springframework.stereotype.Component;
+
 import com.pawmodoro.cats.service.get_all_cats.GetAllCatsOutputBoundary;
 import com.pawmodoro.cats.service.get_all_cats.GetAllCatsOutputData;
 
@@ -12,8 +13,8 @@ import com.pawmodoro.cats.service.get_all_cats.GetAllCatsOutputData;
 public class GetAllCatsPresenter implements GetAllCatsOutputBoundary {
 
     @Override
-    public GetAllCatsResponseDTO prepareResponse(GetAllCatsOutputData outputData) {
-        return new GetAllCatsResponseDTO(
+    public GetAllCatsResponseDto prepareResponse(GetAllCatsOutputData outputData) {
+        return new GetAllCatsResponseDto(
             true,
             outputData.getCats(),
             "Successfully retrieved cats");

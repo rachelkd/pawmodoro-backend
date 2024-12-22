@@ -1,6 +1,6 @@
 package com.pawmodoro.cats.service.get_all_cats;
 
-import com.pawmodoro.cats.service.get_all_cats.interface_adapter.GetAllCatsResponseDTO;
+import com.pawmodoro.cats.service.get_all_cats.interface_adapter.GetAllCatsResponseDto;
 
 /**
  * Output boundary for formatting get all cats responses.
@@ -13,5 +13,5 @@ public interface GetAllCatsOutputBoundary {
      * @param outputData the output data from the get all cats use case
      * @return formatted response DTO for success case
      */
-    GetAllCatsResponseDTO prepareResponse(GetAllCatsOutputData outputData);
+    GetAllCatsResponseDto prepareResponse(GetAllCatsOutputData outputData);
 }

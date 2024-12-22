@@ -1,11 +1,12 @@
 package com.pawmodoro.cats.service.get_all_cats;
 
 import java.util.Collection;
+
 import org.springframework.stereotype.Service;
 
 import com.pawmodoro.cats.entity.Cat;
 import com.pawmodoro.cats.entity.CatAuthenticationException;
-import com.pawmodoro.cats.service.get_all_cats.interface_adapter.GetAllCatsResponseDTO;
+import com.pawmodoro.cats.service.get_all_cats.interface_adapter.GetAllCatsResponseDto;
 import com.pawmodoro.core.DatabaseAccessException;
 
 /**
@@ -25,15 +26,15 @@ public class GetAllCatsInteractor implements GetAllCatsInputBoundary {
     }
 
     @Override
-    public GetAllCatsResponseDTO execute(GetAllCatsInputData getAllCatsInputData)
-        throws DatabaseAccessException, CatAuthenticationException {
+    public GetAllCatsResponseDto execute(
+        GetAllCatsInputData getAllCatsInputData) throws DatabaseAccessException, CatAuthenticationException {
         // Input validation
         if (getAllCatsInputData.getOwnerUsername() == null || getAllCatsInputData.getOwnerUsername().trim().isEmpty()) {
             throw new InvalidGetAllCatsException("Username cannot be null or empty");
         }
 
-        Collection<Cat> cats = catDataAccessObject.getCatsByOwner(getAllCatsInputData.getOwnerUsername());
-        GetAllCatsOutputData outputData = new GetAllCatsOutputData(cats, true, null);
+        final Collection<Cat> cats = catDataAccessObject.getCatsByOwner(getAllCatsInputData.getOwnerUsername());
+        final GetAllCatsOutputData outputData = new GetAllCatsOutputData(cats, true, null);
         return getAllCatsPresenter.prepareResponse(outputData);
     }
 }

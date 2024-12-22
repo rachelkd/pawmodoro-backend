@@ -1,11 +1,11 @@
 package com.pawmodoro.cats.service.get_all_cats.interface_adapter;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.pawmodoro.cats.entity.CatAuthenticationException;
 import com.pawmodoro.cats.service.get_all_cats.GetAllCatsInputBoundary;
@@ -34,10 +34,9 @@ public class GetAllCatsController {
      */
     @GetMapping("/user/{username}")
     @ResponseStatus(HttpStatus.OK)
-    public GetAllCatsResponseDTO getAllCats(@PathVariable
-    String username)
-        throws DatabaseAccessException, CatAuthenticationException {
-        GetAllCatsInputData inputData = new GetAllCatsInputData(username);
+    public GetAllCatsResponseDto getAllCats(@PathVariable String username) 
+            throws DatabaseAccessException, CatAuthenticationException {
+        final GetAllCatsInputData inputData = new GetAllCatsInputData(username);
         return getAllCatsInteractor.execute(inputData);
     }
 }
