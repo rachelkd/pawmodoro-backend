@@ -44,7 +44,8 @@ class LoginInteractorTest {
         // Arrange
         final LoginInputData inputData = new LoginInputData("testuser", "password123");
         final User user = userFactory.create("testuser", "test@example.com");
-        final AuthenticationToken tokens = new AuthenticationToken("token123", "refresh123");
+        final AuthenticationToken tokens =
+            new AuthenticationToken("token123", "refresh123", 3600, 1000000);
         final AuthenticatedUser authenticatedUser = new AuthenticatedUser(user, tokens);
         final LoginResponseDto expectedResponse = LoginResponseDto.from("testuser", tokens);
 

@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.pawmodoro.core.DatabaseAccessException;
+import com.pawmodoro.users.entity.AuthenticationToken;
 import com.pawmodoro.users.entity.CommonUserFactory;
 import com.pawmodoro.users.entity.User;
 import com.pawmodoro.users.entity.UserFactory;
@@ -46,10 +47,11 @@ class SignupInteractorTest {
             "test@example.com",
             "password123",
             "password123");
-        final SignupResponseDto expectedResponse = new SignupResponseDto(
+        final AuthenticationToken tokens =
+            new AuthenticationToken("token123", "refresh123", 3600, 1000000);
+        final SignupResponseDto expectedResponse = SignupResponseDto.from(
             "testuser",
-            "User successfully created with email test@example.com",
-            true);
+            tokens);
 
         when(userDataAccess.existsByName("testuser")).thenReturn(false);
         when(signupPresenter.prepareResponse(any(SignupOutputData.class))).thenReturn(expectedResponse);
