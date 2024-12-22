@@ -17,7 +17,6 @@ public class Main {
      * @param args Command line arguments passed to the application
      */
     public static void main(String[] args) {
-        System.setProperty("spring.profiles.active", "local");
         SpringApplication.run(Main.class, args);
     }
 }
