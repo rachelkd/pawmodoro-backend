@@ -39,6 +39,10 @@ public class SignupInteractor implements SignupInputBoundary {
             throw new InvalidSignupException("Username is already taken");
         }
 
+        if (userDataAccessObject.existsByEmail(signupInputData.getEmail())) {
+            throw new EmailAlreadyRegisteredException("Email is already registered");
+        }
+
         final User user = userFactory.create(
             signupInputData.getUsername(),
             signupInputData.getEmail());

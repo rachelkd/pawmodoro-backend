@@ -427,4 +427,25 @@ public class DbUserDataAccessObject implements SignupUserDataAccessInterface,
             throw new DatabaseAccessException(Constants.ErrorMessages.DB_FAILED_ACCESS, exception);
         }
     }
+
+    @Override
+    public boolean existsByEmail(String email) throws DatabaseAccessException {
+        final Request request = new Request.Builder()
+            .url(apiUrl + Constants.Endpoints.USER_PROFILES_ENDPOINT + Constants.Http.QUERY_START
+                + Constants.JsonFields.EMAIL_FIELD + Constants.Http.QUERY_EQUALS + email)
+            .get()
+            .addHeader(Constants.Http.API_KEY_HEADER, apiKey)
+            .addHeader(Constants.Http.CONTENT_TYPE_HEADER, Constants.Http.CONTENT_TYPE_JSON)
+            .addHeader(Constants.Http.PREFER_HEADER, Constants.Http.PREFER_REPRESENTATION)
+            .build();
+
+        try {
+            final Response response = client.newCall(request).execute();
+            final String responseBody = response.body().string();
+            return response.isSuccessful() && !responseBody.equals(Constants.JsonFields.EMPTY_ARRAY);
+        }
+        catch (IOException exception) {
+            throw new DatabaseAccessException(Constants.ErrorMessages.DB_FAILED_ACCESS, exception);
+        }
+    }
 }

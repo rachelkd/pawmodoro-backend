@@ -15,6 +15,7 @@ import com.pawmodoro.cats.service.get_all_cats.InvalidGetAllCatsException;
 import com.pawmodoro.users.entity.UserNotFoundException;
 import com.pawmodoro.users.service.login.InvalidLoginException;
 import com.pawmodoro.users.service.logout.InvalidLogoutException;
+import com.pawmodoro.users.service.signup.EmailAlreadyRegisteredException;
 import com.pawmodoro.users.service.signup.InvalidSignupException;
 
 /**
@@ -124,6 +125,17 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(InvalidSignupException.class)
     public Map<String, String> handleInvalidSignupException(InvalidSignupException exception) {
+        return createErrorResponse(exception.getMessage());
+    }
+
+    /**
+     * Handles attempts to register with an email that is already in use.
+     * @param exception Email already registered exception
+     * @return Map containing error details
+     */
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    @ExceptionHandler(EmailAlreadyRegisteredException.class)
+    public Map<String, String> handleEmailAlreadyRegisteredException(EmailAlreadyRegisteredException exception) {
         return createErrorResponse(exception.getMessage());
     }
 

@@ -83,6 +83,24 @@ class SignupInteractorTest {
     }
 
     @Test
+    void executeWithExistingEmailThrowsInvalidSignupException() throws DatabaseAccessException {
+        // Arrange
+        final SignupInputData inputData = new SignupInputData(
+            "newuser",
+            "existing@example.com",
+            "password123",
+            "password123");
+
+        when(userDataAccess.existsByName("newuser")).thenReturn(false);
+        when(userDataAccess.existsByEmail("existing@example.com")).thenReturn(true);
+
+        // Act & Assert
+        final EmailAlreadyRegisteredException exception = assertThrows(EmailAlreadyRegisteredException.class,
+            () -> signupInteractor.execute(inputData));
+        assertEquals("Email is already registered", exception.getMessage());
+    }
+
+    @Test
     void executeWithDatabaseErrorThrowsDatabaseAccessException() throws DatabaseAccessException {
         // Arrange
         final SignupInputData inputData = new SignupInputData(
