@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.pawmodoro.cats.entity.Cat;
+import com.pawmodoro.cats.entity.CatAlreadyExistsException;
 import com.pawmodoro.cats.entity.CatFactory;
 import com.pawmodoro.core.AuthenticationException;
 import com.pawmodoro.core.DatabaseAccessException;
@@ -47,7 +48,7 @@ class CreateCatInteractorTest {
 
         @Test
         @DisplayName("Should create cat successfully with image file")
-        void shouldCreateCatSuccessfullyWithImage() throws DatabaseAccessException {
+        void shouldCreateCatSuccessfullyWithImage() throws DatabaseAccessException, CatAlreadyExistsException {
             // Arrange
             final CreateCatInputData inputData = new CreateCatInputData(
                 VALID_NAME,
@@ -80,7 +81,7 @@ class CreateCatInteractorTest {
 
         @Test
         @DisplayName("Should create cat successfully without image file")
-        void shouldCreateCatSuccessfullyWithoutImage() throws DatabaseAccessException {
+        void shouldCreateCatSuccessfullyWithoutImage() throws DatabaseAccessException, CatAlreadyExistsException {
             // Arrange
             final CreateCatInputData inputData = new CreateCatInputData(
                 VALID_NAME,
@@ -120,7 +121,7 @@ class CreateCatInteractorTest {
 
         @Test
         @DisplayName("Should throw authentication error")
-        void shouldThrowAuthenticationError() throws DatabaseAccessException {
+        void shouldThrowAuthenticationError() throws DatabaseAccessException, CatAlreadyExistsException {
             // Arrange
             final CreateCatInputData inputData = new CreateCatInputData(
                 VALID_NAME,
@@ -143,7 +144,7 @@ class CreateCatInteractorTest {
 
         @Test
         @DisplayName("Should throw database error")
-        void shouldThrowDatabaseError() throws DatabaseAccessException {
+        void shouldThrowDatabaseError() throws DatabaseAccessException, CatAlreadyExistsException {
             // Arrange
             final CreateCatInputData inputData = new CreateCatInputData(
                 VALID_NAME,

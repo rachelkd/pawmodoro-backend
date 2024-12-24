@@ -251,12 +251,125 @@ Authorization: Bearer <token>
 }
 ```
 
+#### Create Cat
+
+```http
+POST /api/cats/{username}
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Request Body:**
+
+```json
+{
+    "name": "string",  // Required, letters only, 1-20 chars
+    "imageFileName": "string"  // Optional, must match pattern "cat-[1-5].png"
+}
+```
+
+**Responses:**
+
+- `201 CREATED`: Cat created successfully
+
+```json
+{
+    "catName": "string",
+    "ownerUsername": "string",
+    "imageFileName": "string"
+}
+```
+
+- `400 BAD_REQUEST`: Invalid input
+
+```json
+{
+    "name": "Cat name must contain only letters"
+}
+```
+
+```json
+{
+    "imageFileName": "Image file name must be in format 'cat-[1-5].png'"
+}
+```
+
+- `401 UNAUTHORIZED`: Missing or invalid token
+
+```json
+{
+    "message": "Authorization token is required"
+}
+```
+
+- `403 FORBIDDEN`: Not authorized to create a cat for this user
+
+```json
+{
+    "message": "You are not authorized to create a cat for user 'string'"
+}
+```
+
+- `409 CONFLICT`: Cat name already exists for user
+
+```json
+{
+    "message": "A cat with this name already exists for this user"
+}
+```
+
+#### Delete Cat
+
+```http
+DELETE /api/cats/{username}
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Request Body:**
+
+```json
+{
+    "name": "string"  // Required, letters only, 1-20 chars
+}
+```
+
+**Responses:**
+
+- `200 OK`: Cat deleted successfully
+
+```json
+{
+    "message": "Cat deleted successfully",
+    "catName": "string"
+}
+```
+
+- `400 BAD_REQUEST`: Invalid input
+
+```json
+{
+    "name": "Cat name must be between 1 and 20 characters"
+}
+```
+
+- `401 UNAUTHORIZED`: Missing or invalid token
+
+```json
+{
+    "message": "Authorization token is required"
+}
+```
+
 ## Authentication
+
 The API uses Supabase for authentication. All endpoints except login and signup require:
+
 1. A valid Supabase session token in the `Authorization` header
 2. The Supabase project's anon key in the `apikey` header
 
 ## Database
+
 The application uses Supabase with the following main tables:
 - `auth.users`: Authentication data
 - `public.user_profiles`: User profile information
@@ -264,10 +377,11 @@ The application uses Supabase with the following main tables:
 - `public.user_settings`: User preferences and settings
 
 ## Running Locally
+
 1. Ensure Java 21 is installed
 2. Set up environment variables:
    - `SUPABASE_URL`
-   - `SUPABASE_KEY`
+   - `SUPABASE_ANON_KEY`
 3. Run the application:
 ```bash
 ./mvnw spring-boot:run

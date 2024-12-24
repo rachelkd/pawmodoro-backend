@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.pawmodoro.cats.entity.CatAlreadyExistsException;
+import com.pawmodoro.cats.entity.NoCatsFoundException;
 import com.pawmodoro.cats.service.get_all_cats.InvalidGetAllCatsException;
 import com.pawmodoro.users.entity.UserNotFoundException;
 import com.pawmodoro.users.service.login.InvalidLoginException;
@@ -82,6 +84,28 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles no cats found scenarios.
+     * @param exception No cats found exception
+     * @return Map containing error details
+     */
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(NoCatsFoundException.class)
+    public Map<String, String> handleNoCatsFoundException(NoCatsFoundException exception) {
+        return createErrorResponse(exception.getMessage());
+    }
+
+    /**
+     * Handles cat already exists scenarios.
+     * @param exception Cat already exists exception
+     * @return Map containing error details
+     */
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(CatAlreadyExistsException.class)
+    public Map<String, String> handleCatAlreadyExistsException(CatAlreadyExistsException exception) {
+        return createErrorResponse(exception.getMessage());
+    }
+
+    /**
      * Handles database access errors.
      * @param exception Database access exception
      * @return Map containing error details
@@ -122,6 +146,17 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(InvalidLogoutException.class)
     public Map<String, String> handleInvalidLogoutException(InvalidLogoutException exception) {
+        return createErrorResponse(exception.getMessage());
+    }
+
+    /**
+     * Handles forbidden access attempts.
+     * @param exception Forbidden access exception
+     * @return Map containing error details
+     */
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(ForbiddenAccessException.class)
+    public Map<String, String> handleForbiddenAccessException(ForbiddenAccessException exception) {
         return createErrorResponse(exception.getMessage());
     }
 

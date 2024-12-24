@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.pawmodoro.cats.entity.CatAlreadyExistsException;
 import com.pawmodoro.cats.service.create_cat.CreateCatInputBoundary;
 import com.pawmodoro.cats.service.create_cat.CreateCatInputData;
 import com.pawmodoro.core.DatabaseAccessException;
@@ -34,12 +35,14 @@ public class CreateCatController {
      * @return the response containing the created cat
      * @throws CatAuthenticationException if the authentication fails
      * @throws DatabaseAccessException if there is an error accessing the database
+     * @throws CatAlreadyExistsException if a cat with the same name already exists for the user
      */
-    @PostMapping("/{username}/create")
+    @PostMapping("/{username}")
     @ResponseStatus(HttpStatus.CREATED)
     public CreateCatResponseDto createCat(
         @PathVariable final String username,
-        @Valid @RequestBody final CreateCatRequestDto request) throws DatabaseAccessException {
+        @Valid @RequestBody final CreateCatRequestDto request) 
+            throws DatabaseAccessException, CatAlreadyExistsException {
         final CreateCatInputData inputData = new CreateCatInputData(
             request.name(),
             username,

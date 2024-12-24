@@ -3,6 +3,7 @@ package com.pawmodoro.cats.service.create_cat;
 import org.springframework.stereotype.Service;
 
 import com.pawmodoro.cats.entity.Cat;
+import com.pawmodoro.cats.entity.CatAlreadyExistsException;
 import com.pawmodoro.cats.entity.CatFactory;
 import com.pawmodoro.cats.service.create_cat.interface_adapter.CreateCatResponseDto;
 import com.pawmodoro.core.DatabaseAccessException;
@@ -29,10 +30,15 @@ public class CreateCatInteractor implements CreateCatInputBoundary {
 
     @Override
     public CreateCatResponseDto execute(
-        final CreateCatInputData inputData) throws DatabaseAccessException {
+        final CreateCatInputData inputData) throws DatabaseAccessException, CatAlreadyExistsException {
         final String catName = inputData.getCatName();
         final String ownerUsername = inputData.getOwnerUsername();
         final String imageFileName = inputData.getImageFileName();
+
+        if (dataAccess.catExistsByNameAndOwnerUsername(catName, ownerUsername)) {
+            throw new CatAlreadyExistsException(
+                "A cat with name %s already exists for user %s".formatted(catName, ownerUsername));
+        }
 
         final Cat cat;
         if (imageFileName == null || imageFileName.trim().isEmpty()) {
