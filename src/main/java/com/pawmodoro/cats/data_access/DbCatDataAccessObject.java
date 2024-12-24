@@ -27,7 +27,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
- * Database implementation of CatDataAccessInterface using Supabase.
+ * Database implementation of cat-related data access interface using Supabase.
  * This class handles all cat-related database operations including retrieving cats by owner.
  */
 @Repository
