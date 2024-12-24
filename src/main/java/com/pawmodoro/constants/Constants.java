@@ -113,17 +113,6 @@ public final class Constants {
     }
 
     /**
-     * HTTP status codes used in the application.
-     */
-    public static final class StatusCodes {
-        public static final int UNAUTHORIZED = 401;
-
-        private StatusCodes() {
-            // Prevent instantiation
-        }
-    }
-
-    /**
      * Validation constants used for input validation throughout the application.
      */
     public static final class ValidationConstants {
@@ -131,6 +120,9 @@ public final class Constants {
         public static final int MAX_USERNAME_LENGTH = 50;
         public static final int MIN_PASSWORD_LENGTH = 6;
         public static final int MAX_PASSWORD_LENGTH = 50;
+        public static final int MAX_CAT_NAME_LENGTH = 20;
+        public static final String LETTERS_ONLY_PATTERN = "^[a-zA-Z]+$";
+        public static final String CAT_IMAGE_PATTERN = "^cat-[1-5]\\.png$";
 
         private ValidationConstants() {
             // Prevent instantiation

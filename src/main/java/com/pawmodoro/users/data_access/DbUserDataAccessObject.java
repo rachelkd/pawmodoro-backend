@@ -6,9 +6,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
 import com.pawmodoro.constants.Constants;
+import com.pawmodoro.core.AuthenticationException;
 import com.pawmodoro.core.DatabaseAccessException;
 import com.pawmodoro.users.entity.AuthenticatedUser;
 import com.pawmodoro.users.entity.AuthenticationToken;
@@ -45,10 +47,8 @@ public class DbUserDataAccessObject implements SignupUserDataAccessInterface,
      */
     public DbUserDataAccessObject(
         UserFactory userFactory,
-        @Value("${supabase.url}")
-        String apiUrl,
-        @Value("${supabase.key}")
-        String apiKey) {
+        @Value("${supabase.url}") String apiUrl,
+        @Value("${supabase.key}") String apiKey) {
         this.userFactory = userFactory;
         this.client = new OkHttpClient().newBuilder().build();
         this.apiUrl = apiUrl;
@@ -406,9 +406,14 @@ public class DbUserDataAccessObject implements SignupUserDataAccessInterface,
         try (Response response = client.newCall(request).execute()) {
             final String responseBody = response.body().string();
             if (!response.isSuccessful()) {
-                throw new UserNotFoundException(parseErrorMessage(responseBody));
-                // TODO: Make new exception for invalid refresh token with 400 BAD REQUEST for Already Used and Refresh
-                // Token Not Found
+                if (response.code() == HttpStatus.BAD_REQUEST.value()) {
+                    // Handle refresh token errors (already used or not found)
+                    throw new AuthenticationException(parseErrorMessage(responseBody));
+                }
+                if (response.code() == HttpStatus.UNAUTHORIZED.value()) {
+                    throw new UserNotFoundException(parseErrorMessage(responseBody));
+                }
+                throw new DatabaseAccessException(Constants.ErrorMessages.DB_FAILED_ACCESS);
             }
 
             final JSONObject tokens = new JSONObject(responseBody);

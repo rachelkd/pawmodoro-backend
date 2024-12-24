@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
 import com.pawmodoro.constants.Constants;
@@ -46,10 +47,8 @@ public class DbUserSettingsDataAccessObject
      * @param apiKey the Supabase API key
      */
     public DbUserSettingsDataAccessObject(
-        @Value("${supabase.url}")
-        String apiUrl,
-        @Value("${supabase.key}")
-        String apiKey) {
+        @Value("${supabase.url}") String apiUrl,
+        @Value("${supabase.key}") String apiKey) {
         this.client = new OkHttpClient().newBuilder().build();
         this.apiUrl = apiUrl;
         this.apiKey = apiKey;
@@ -83,7 +82,7 @@ public class DbUserSettingsDataAccessObject
     private String executeUserProfileRequest(Request request,
         String username) throws UserNotFoundException, DatabaseAccessException {
         try (Response response = client.newCall(request).execute()) {
-            if (response.code() == Constants.StatusCodes.UNAUTHORIZED) {
+            if (response.code() == HttpStatus.UNAUTHORIZED.value()) {
                 throw new AuthenticationException(Constants.ErrorMessages.AUTH_TOKEN_INVALID);
             }
             else if (!response.isSuccessful()) {
@@ -133,7 +132,7 @@ public class DbUserSettingsDataAccessObject
     private UserSettings executeUserSettingsRequest(Request request,
         String username) throws DatabaseAccessException {
         try (Response response = client.newCall(request).execute()) {
-            if (response.code() == Constants.StatusCodes.UNAUTHORIZED) {
+            if (response.code() == HttpStatus.UNAUTHORIZED.value()) {
                 throw new AuthenticationException(Constants.ErrorMessages.AUTH_TOKEN_INVALID);
             }
             else if (!response.isSuccessful()) {
@@ -218,7 +217,7 @@ public class DbUserSettingsDataAccessObject
 
     private void executeUpdateSettingsRequest(Request request) throws DatabaseAccessException {
         try (Response response = client.newCall(request).execute()) {
-            if (response.code() == Constants.StatusCodes.UNAUTHORIZED) {
+            if (response.code() == HttpStatus.UNAUTHORIZED.value()) {
                 throw new AuthenticationException(Constants.ErrorMessages.AUTH_TOKEN_INVALID);
             }
             else if (!response.isSuccessful()) {
