@@ -91,7 +91,8 @@ class GetUserSettingsInteractorTest {
 
         @Test
         @DisplayName("should throw UserNotFoundException when user does not exist")
-        void shouldThrowUserNotFoundExceptionWhenUserDoesNotExist() throws DatabaseAccessException, UserNotFoundException {
+        void shouldThrowUserNotFoundExceptionWhenUserDoesNotExist()
+                throws DatabaseAccessException, UserNotFoundException {
             // Arrange
             final GetUserSettingsInputData inputData = new GetUserSettingsInputData(
                 TEST_USERNAME,
@@ -107,7 +108,8 @@ class GetUserSettingsInteractorTest {
 
         @Test
         @DisplayName("should throw DatabaseAccessException when database access fails")
-        void shouldThrowDatabaseAccessExceptionWhenDatabaseAccessFails() throws DatabaseAccessException, UserNotFoundException {
+        void shouldThrowDatabaseAccessExceptionWhenDatabaseAccessFails()
+                throws DatabaseAccessException, UserNotFoundException {
             // Arrange
             final GetUserSettingsInputData inputData = new GetUserSettingsInputData(
                 TEST_USERNAME,
