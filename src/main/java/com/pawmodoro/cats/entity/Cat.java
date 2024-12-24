@@ -29,9 +29,6 @@ public class Cat {
      * @throws IllegalArgumentException if name is null or empty
      */
     public Cat(String name, String ownerUsername) {
-        if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Cat name cannot be null or empty");
-        }
         this.name = name;
         this.ownerUsername = ownerUsername;
         this.hungerLevel = INITIAL_LEVEL;
@@ -53,13 +50,26 @@ public class Cat {
      * @throws IllegalArgumentException if name is null or empty
      */
     public Cat(String name, String ownerUsername, int happinessLevel, int hungerLevel, String imageFileName) {
-        if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Cat name cannot be null or empty");
-        }
         this.name = name;
         this.ownerUsername = ownerUsername;
         this.happinessLevel = Math.clamp(happinessLevel, MIN_LEVEL, MAX_LEVEL);
         this.hungerLevel = Math.clamp(hungerLevel, MIN_LEVEL, MAX_LEVEL);
+        this.imageFileName = imageFileName;
+    }
+
+    /**
+     * Creates a new Cat with name, owner username, and a specific image file.
+     * Initializes happiness and hunger levels to maximum.
+     * @param name The unique name of the cat
+     * @param ownerUsername The username of the cat's owner
+     * @param imageFileName The image file name for this cat
+     * @throws IllegalArgumentException if name is null or empty
+     */
+    public Cat(String name, String ownerUsername, String imageFileName) {
+        this.name = name;
+        this.ownerUsername = ownerUsername;
+        this.hungerLevel = INITIAL_LEVEL;
+        this.happinessLevel = INITIAL_LEVEL;
         this.imageFileName = imageFileName;
     }
 

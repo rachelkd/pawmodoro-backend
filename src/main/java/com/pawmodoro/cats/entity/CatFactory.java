@@ -30,4 +30,16 @@ public class CatFactory {
     public Cat create(String name, String ownerUsername, int happinessLevel, int hungerLevel, String imageFileName) {
         return new Cat(name, ownerUsername, happinessLevel, hungerLevel, imageFileName);
     }
+
+    /**
+     * Creates a new Cat with the given name, owner username, and image file name.
+     * Initializes with default happiness and hunger levels.
+     * @param name The name for the cat
+     * @param ownerUsername The username of the cat's owner
+     * @param imageFileName The image file name of the cat
+     * @return A new Cat instance
+     */
+    public Cat create(String name, String ownerUsername, String imageFileName) {
+        return new Cat(name, ownerUsername, imageFileName);
+    }
 }
