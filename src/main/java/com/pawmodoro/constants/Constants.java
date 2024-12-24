@@ -23,6 +23,9 @@ public final class Constants {
         public static final String PREFER_MINIMAL = "return=minimal";
         public static final String QUERY_START = "?";
         public static final String QUERY_EQUALS = "=eq.";
+        public static final String SELECT_PARAM = "select=";
+        public static final String LIMIT_PARAM = "limit=";
+        public static final String AND_OPERATOR = "&";
 
         private Http() {
             // Prevent instantiation
@@ -106,6 +109,9 @@ public final class Constants {
         public static final String DB_FAILED_CREATE_PROFILE = "Failed to create user profile: %s";
         public static final String DB_FAILED_CREATE_SETTINGS = "Failed to create user settings: %s";
         public static final String DB_FAILED_RETRIEVE_CATS = "Failed to retrieve cats: %s";
+        public static final String DB_FAILED_SAVE_CAT = "Failed to save cat: %s";
+        public static final String DB_FAILED_CHECK_CAT_EXISTS = "Failed to check cat existence: %s";
+        public static final String DB_DUPLICATE_CAT_NAME = "A cat with this name already exists for this user";
 
         private ErrorMessages() {
             // Prevent instantiation

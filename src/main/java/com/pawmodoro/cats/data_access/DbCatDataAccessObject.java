@@ -13,12 +13,16 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.pawmodoro.cats.entity.Cat;
+import com.pawmodoro.cats.entity.CatAlreadyExistsException;
 import com.pawmodoro.cats.entity.CatFactory;
+import com.pawmodoro.cats.entity.NoCatsFoundException;
 import com.pawmodoro.cats.service.create_cat.CreateCatDataAccessInterface;
+import com.pawmodoro.cats.service.delete_cat.DeleteCatDataAccessInterface;
 import com.pawmodoro.cats.service.get_all_cats.GetAllCatsDataAccessInterface;
 import com.pawmodoro.constants.Constants;
 import com.pawmodoro.core.AuthenticationException;
 import com.pawmodoro.core.DatabaseAccessException;
+import com.pawmodoro.core.ForbiddenAccessException;
 import jakarta.servlet.http.HttpServletRequest;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -31,7 +35,8 @@ import okhttp3.Response;
  * This class handles all cat-related database operations including retrieving cats by owner.
  */
 @Repository
-public class DbCatDataAccessObject implements GetAllCatsDataAccessInterface, CreateCatDataAccessInterface {
+public class DbCatDataAccessObject implements GetAllCatsDataAccessInterface, CreateCatDataAccessInterface,
+    DeleteCatDataAccessInterface {
     private static final MediaType JSON = MediaType.get(Constants.Http.CONTENT_TYPE_JSON);
     private final OkHttpClient client;
     private final String apiUrl;
@@ -52,6 +57,16 @@ public class DbCatDataAccessObject implements GetAllCatsDataAccessInterface, Cre
         this.client = new OkHttpClient().newBuilder().build();
         this.apiUrl = apiUrl;
         this.apiKey = apiKey;
+    }
+
+    private String getAndValidateAuthToken() throws AuthenticationException {
+        final HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+            .getRequest();
+        final String authToken = request.getHeader(Constants.Http.AUTH_HEADER);
+        if (authToken == null || !authToken.startsWith(Constants.Http.BEARER_PREFIX)) {
+            throw new AuthenticationException(Constants.ErrorMessages.AUTH_TOKEN_REQUIRED);
+        }
+        return authToken;
     }
 
     @Override
@@ -102,7 +117,7 @@ public class DbCatDataAccessObject implements GetAllCatsDataAccessInterface, Cre
     }
 
     @Override
-    public Cat saveCat(Cat cat) throws DatabaseAccessException {
+    public Cat saveCat(Cat cat) throws DatabaseAccessException, CatAlreadyExistsException {
         // Get the authorization token from the current request
         final String authToken = getAndValidateAuthToken();
 
@@ -132,8 +147,21 @@ public class DbCatDataAccessObject implements GetAllCatsDataAccessInterface, Cre
                 if (response.code() == HttpStatus.UNAUTHORIZED.value()) {
                     throw new AuthenticationException(Constants.ErrorMessages.AUTH_TOKEN_INVALID);
                 }
+                else if (response.code() == HttpStatus.FORBIDDEN.value()) {
+                    throw new ForbiddenAccessException(
+                        "You are not authorized to create a cat for user: " + cat.getOwnerUsername());
+                }
+
+                // Parse the error message from the response body
+                final JSONObject errorJson = new JSONObject(responseBody);
+                final String errorMessage = errorJson.getString("message");
+
+                if (response.code() == HttpStatus.CONFLICT.value()) {
+                    throw new CatAlreadyExistsException(Constants.ErrorMessages.DB_DUPLICATE_CAT_NAME);
+                }
+
                 throw new DatabaseAccessException(
-                    String.format(Constants.ErrorMessages.DB_FAILED_RETRIEVE_CATS, response.message()));
+                    String.format(Constants.ErrorMessages.DB_FAILED_SAVE_CAT, errorMessage));
             }
 
             // Parse the response and create a new Cat entity
@@ -153,17 +181,101 @@ public class DbCatDataAccessObject implements GetAllCatsDataAccessInterface, Cre
         }
         catch (final IOException exception) {
             throw new DatabaseAccessException(
-                String.format(Constants.ErrorMessages.DB_FAILED_RETRIEVE_CATS, exception.getMessage()));
+                String.format(Constants.ErrorMessages.DB_FAILED_SAVE_CAT, exception.getMessage()));
         }
     }
 
-    private String getAndValidateAuthToken() throws AuthenticationException {
-        final HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-            .getRequest();
-        final String authToken = request.getHeader(Constants.Http.AUTH_HEADER);
-        if (authToken == null || !authToken.startsWith(Constants.Http.BEARER_PREFIX)) {
-            throw new AuthenticationException(Constants.ErrorMessages.AUTH_TOKEN_REQUIRED);
+    @Override
+    public void deleteCat(String catName, String ownerUsername) throws DatabaseAccessException {
+        // Get the authorization token from the current request
+        final String authToken = getAndValidateAuthToken();
+
+        // Build the request URL with query parameters to delete the specific cat
+        final String queryUrl = apiUrl + Constants.Endpoints.CATS_ENDPOINT
+            + Constants.Http.QUERY_START
+            + Constants.JsonFields.CAT_NAME + Constants.Http.QUERY_EQUALS + catName
+            + Constants.Http.AND_OPERATOR
+            + Constants.JsonFields.OWNER_USERNAME + Constants.Http.QUERY_EQUALS + ownerUsername;
+
+        // Create the request with proper headers
+        final Request supabaseRequest = new Request.Builder()
+            .url(queryUrl)
+            .delete()
+            .addHeader(Constants.Http.API_KEY_HEADER, apiKey)
+            .addHeader(Constants.Http.AUTH_HEADER, authToken)
+            .addHeader(Constants.Http.PREFER_HEADER, Constants.Http.PREFER_MINIMAL)
+            .build();
+
+        try {
+            final Response response = client.newCall(supabaseRequest).execute();
+
+            if (!response.isSuccessful()) {
+                final String responseBody = response.body().string();
+
+                if (response.code() == HttpStatus.UNAUTHORIZED.value()) {
+                    throw new AuthenticationException(Constants.ErrorMessages.AUTH_TOKEN_INVALID);
+                }
+                else if (response.code() == HttpStatus.FORBIDDEN.value()) {
+                    throw new ForbiddenAccessException("You are not authorized to delete this cat");
+                }
+                else if (response.code() == HttpStatus.NOT_FOUND.value()) {
+                    throw new NoCatsFoundException(
+                        String.format("Cat not found with the name %s for user %s", catName, ownerUsername));
+                }
+
+                throw new DatabaseAccessException(
+                    String.format("Failed to delete cat: %s", responseBody));
+            }
+
         }
-        return authToken;
+        catch (final IOException exception) {
+            throw new DatabaseAccessException(
+                String.format("Failed to delete cat: %s", exception.getMessage()));
+        }
     }
+
+    @Override
+    public boolean catExistsByNameAndOwnerUsername(String catName,
+        String ownerUsername) throws DatabaseAccessException {
+        // Get the authorization token from the current request
+        final String authToken = getAndValidateAuthToken();
+
+        // Build the request URL with query parameters to check for existence
+        final String queryUrl = apiUrl + Constants.Endpoints.CATS_ENDPOINT
+            + Constants.Http.QUERY_START + Constants.Http.SELECT_PARAM + Constants.JsonFields.ID_FIELD
+            + Constants.Http.AND_OPERATOR + Constants.JsonFields.CAT_NAME + Constants.Http.QUERY_EQUALS + catName
+            + Constants.Http.AND_OPERATOR + Constants.JsonFields.OWNER_USERNAME + Constants.Http.QUERY_EQUALS
+            + ownerUsername
+            + Constants.Http.AND_OPERATOR + Constants.Http.LIMIT_PARAM + "1";
+
+        final Request supabaseRequest = new Request.Builder()
+            .url(queryUrl)
+            .get()
+            .addHeader(Constants.Http.API_KEY_HEADER, apiKey)
+            .addHeader(Constants.Http.AUTH_HEADER, authToken)
+            .build();
+
+        try {
+            final Response response = client.newCall(supabaseRequest).execute();
+            final String responseBody = response.body().string();
+
+            if (!response.isSuccessful()) {
+                if (response.code() == HttpStatus.UNAUTHORIZED.value()) {
+                    throw new AuthenticationException(Constants.ErrorMessages.AUTH_TOKEN_INVALID);
+                }
+                throw new DatabaseAccessException(
+                    String.format(Constants.ErrorMessages.DB_FAILED_CHECK_CAT_EXISTS, response.message()));
+            }
+
+            // If the response is an empty array, the cat doesn't exist
+            // If it's not empty, the cat exists
+            final JSONArray jsonArray = new JSONArray(responseBody);
+            return jsonArray.length() > 0;
+        }
+        catch (final IOException exception) {
+            throw new DatabaseAccessException(
+                String.format(Constants.ErrorMessages.DB_FAILED_CHECK_CAT_EXISTS, exception.getMessage()));
+        }
+    }
+
 }
