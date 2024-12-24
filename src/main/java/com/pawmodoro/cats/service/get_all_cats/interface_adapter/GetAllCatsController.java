@@ -34,8 +34,8 @@ public class GetAllCatsController {
      */
     @GetMapping("/{username}")
     @ResponseStatus(HttpStatus.OK)
-    public GetAllCatsResponseDto getAllCats(@PathVariable
-    String username) throws DatabaseAccessException, CatAuthenticationException {
+    public GetAllCatsResponseDto getAllCats(@PathVariable String username) 
+            throws DatabaseAccessException, CatAuthenticationException {
         final GetAllCatsInputData inputData = new GetAllCatsInputData(username);
         return getAllCatsInteractor.execute(inputData);
     }
