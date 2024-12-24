@@ -217,7 +217,7 @@ Content-Type: application/json
 
 #### Get All Cats
 ```http
-GET /api/cats/user/{username}
+GET /api/cats/{username}
 Authorization: Bearer <token>
 ```
 
