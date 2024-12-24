@@ -21,8 +21,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.pawmodoro.cats.entity.Cat;
-import com.pawmodoro.cats.entity.CatAuthenticationException;
 import com.pawmodoro.cats.service.get_all_cats.interface_adapter.GetAllCatsResponseDto;
+import com.pawmodoro.core.AuthenticationException;
 import com.pawmodoro.core.DatabaseAccessException;
 
 /**
@@ -49,7 +49,7 @@ class GetAllCatsInteractorTest {
     }
 
     @Test
-    void executeWhenCatsExistReturnsSuccessResponse() throws DatabaseAccessException, CatAuthenticationException {
+    void executeWhenCatsExistReturnsSuccessResponse() throws DatabaseAccessException {
         // Arrange
         final Collection<Cat> cats = new ArrayList<>();
         cats.add(mockCat);
@@ -77,8 +77,7 @@ class GetAllCatsInteractorTest {
     }
 
     @Test
-    void executeWhenNoCatsExistReturnsEmptySuccessResponse()
-            throws DatabaseAccessException, CatAuthenticationException {
+    void executeWhenNoCatsExistReturnsEmptySuccessResponse() throws DatabaseAccessException {
         // Arrange
         final Collection<Cat> emptyCats = new ArrayList<>();
         final GetAllCatsInputData inputData = new GetAllCatsInputData(TEST_USERNAME);
@@ -104,7 +103,7 @@ class GetAllCatsInteractorTest {
     }
 
     @Test
-    void executeWhenNullUsernameThrowsException() throws DatabaseAccessException, CatAuthenticationException {
+    void executeWhenNullUsernameThrowsException() throws DatabaseAccessException {
         // Arrange
         final GetAllCatsInputData inputData = new GetAllCatsInputData(null);
 
@@ -126,7 +125,7 @@ class GetAllCatsInteractorTest {
     }
 
     @Test
-    void executeWhenEmptyUsernameThrowsException() throws DatabaseAccessException, CatAuthenticationException {
+    void executeWhenEmptyUsernameThrowsException() throws DatabaseAccessException {
         // Arrange
         final GetAllCatsInputData inputData = new GetAllCatsInputData("");
 
@@ -148,16 +147,15 @@ class GetAllCatsInteractorTest {
     }
 
     @Test
-    void executeWhenUnauthorizedThrowsCatAuthenticationException()
-            throws DatabaseAccessException, CatAuthenticationException {
+    void executeWhenUnauthorizedThrowsCatAuthenticationException() throws DatabaseAccessException {
         // Arrange
         final GetAllCatsInputData inputData = new GetAllCatsInputData(TEST_USERNAME);
         when(catDataAccessObject.getCatsByOwner(TEST_USERNAME))
-            .thenThrow(new CatAuthenticationException("User not authorized to view these cats"));
+            .thenThrow(new AuthenticationException("User not authorized to view these cats"));
 
         // Act & Assert
-        final CatAuthenticationException exception = assertThrows(
-            CatAuthenticationException.class,
+        final AuthenticationException exception = assertThrows(
+            AuthenticationException.class,
             () -> {
                 interactor.execute(inputData);
             });

@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.pawmodoro.cats.entity.CatAuthenticationException;
 import com.pawmodoro.cats.service.get_all_cats.GetAllCatsInputBoundary;
 import com.pawmodoro.cats.service.get_all_cats.GetAllCatsInputData;
 import com.pawmodoro.core.DatabaseAccessException;
@@ -34,8 +33,8 @@ public class GetAllCatsController {
      */
     @GetMapping("/{username}")
     @ResponseStatus(HttpStatus.OK)
-    public GetAllCatsResponseDto getAllCats(@PathVariable String username) 
-            throws DatabaseAccessException, CatAuthenticationException {
+    public GetAllCatsResponseDto getAllCats(
+        @PathVariable String username) throws DatabaseAccessException {
         final GetAllCatsInputData inputData = new GetAllCatsInputData(username);
         return getAllCatsInteractor.execute(inputData);
     }
