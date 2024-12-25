@@ -30,13 +30,6 @@ import okhttp3.Response;
 public class DbUserSettingsDataAccessObject
     implements GetUserSettingsDataAccessInterface, UpdateUserSettingsDataAccessInterface {
 
-    // Default settings values
-    private static final int DEFAULT_FOCUS_DURATION = 25;
-    private static final int DEFAULT_SHORT_BREAK = 5;
-    private static final int DEFAULT_LONG_BREAK = 15;
-    private static final boolean DEFAULT_AUTO_START_BREAKS = false;
-    private static final boolean DEFAULT_AUTO_START_FOCUS = false;
-
     private final OkHttpClient client;
     private final String apiUrl;
     private final String apiKey;
@@ -55,7 +48,7 @@ public class DbUserSettingsDataAccessObject
     }
 
     /**
-     * Gets the user ID from the user_profiles table.
+     * Gets the user ID from the public.user_profiles table.
      * @param username the username to look up
      * @param accessToken the Supabase access token
      * @return the user's ID
@@ -143,44 +136,23 @@ public class DbUserSettingsDataAccessObject
             }
 
             final String responseBody = response.body().string();
-            return parseUserSettings(responseBody, username);
+            if (responseBody.equals(Constants.JsonFields.EMPTY_ARRAY)) {
+                throw new DatabaseAccessException("Settings not found for user: " + username);
+            }
+
+            final JSONArray settingsArray = new JSONArray(responseBody);
+            final JSONObject settings = settingsArray.getJSONObject(0);
+            return new UserSettings(
+                username,
+                settings.getInt(Constants.JsonFields.FOCUS_DURATION),
+                settings.getInt(Constants.JsonFields.SHORT_BREAK_DURATION),
+                settings.getInt(Constants.JsonFields.LONG_BREAK_DURATION),
+                settings.getBoolean(Constants.JsonFields.AUTO_START_BREAKS),
+                settings.getBoolean(Constants.JsonFields.AUTO_START_FOCUS));
         }
         catch (IOException exception) {
             throw new DatabaseAccessException(Constants.ErrorMessages.DB_FAILED_ACCESS + ": " + exception.getMessage());
         }
-    }
-
-    private UserSettings parseUserSettings(String responseBody, String username) {
-        final UserSettings settings;
-        if (responseBody.equals(Constants.JsonFields.EMPTY_ARRAY)) {
-            settings = createDefaultSettings(username);
-        }
-        else {
-            final JSONArray settingsArray = new JSONArray(responseBody);
-            final JSONObject jsonSettings = settingsArray.getJSONObject(0);
-            settings = createUserSettings(username, jsonSettings);
-        }
-        return settings;
-    }
-
-    private UserSettings createDefaultSettings(String username) {
-        return new UserSettings(
-            username,
-            DEFAULT_FOCUS_DURATION,
-            DEFAULT_SHORT_BREAK,
-            DEFAULT_LONG_BREAK,
-            DEFAULT_AUTO_START_BREAKS,
-            DEFAULT_AUTO_START_FOCUS);
-    }
-
-    private UserSettings createUserSettings(String username, JSONObject settings) {
-        return new UserSettings(
-            username,
-            settings.getInt(Constants.JsonFields.FOCUS_DURATION),
-            settings.getInt(Constants.JsonFields.SHORT_BREAK_DURATION),
-            settings.getInt(Constants.JsonFields.LONG_BREAK_DURATION),
-            settings.getBoolean(Constants.JsonFields.AUTO_START_BREAKS),
-            settings.getBoolean(Constants.JsonFields.AUTO_START_FOCUS));
     }
 
     @Override
@@ -193,7 +165,6 @@ public class DbUserSettingsDataAccessObject
 
     private Request buildUpdateSettingsRequest(String id, String accessToken, UserSettings userSettings) {
         final JSONObject requestBody = new JSONObject()
-            .put(Constants.JsonFields.ID_FIELD, id)
             .put(Constants.JsonFields.FOCUS_DURATION, userSettings.getFocusDuration())
             .put(Constants.JsonFields.SHORT_BREAK_DURATION, userSettings.getShortBreakDuration())
             .put(Constants.JsonFields.LONG_BREAK_DURATION, userSettings.getLongBreakDuration())

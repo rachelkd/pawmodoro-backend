@@ -72,113 +72,41 @@ public class DbUserDataAccessObject implements SignupUserDataAccessInterface,
         return result;
     }
 
+    /**
+     * Saves a new user with the given password and returns authentication tokens.
+     * The user profile and settings will be automatically created by database triggers.
+     * @param user the user to save
+     * @param password the user's password
+     * @return authentication tokens for the new user
+     * @throws DatabaseAccessException if there is a database error
+     */
     @Override
     public AuthenticationToken save(User user, String password) throws DatabaseAccessException {
-        try {
-            // First create the auth user
-            final JSONObject authResponse = createAuthUser(user.getEmail(), password);
-            final String userId = authResponse.getJSONObject(Constants.JsonFields.USER_FIELD)
-                .getString(Constants.JsonFields.ID_FIELD);
-            final String accessToken = authResponse.getString(Constants.JsonFields.ACCESS_TOKEN_FIELD);
-            final String refreshToken = authResponse.getString(Constants.JsonFields.REFRESH_TOKEN_FIELD);
-            final int expiresIn = authResponse.getInt(Constants.JsonFields.EXPIRES_IN_FIELD);
-            final long expiresAt = authResponse.getLong(Constants.JsonFields.EXPIRES_AT_FIELD);
+        final JSONObject authResponse = createAuthUser(user, password);
+        final String accessToken = authResponse.getString(Constants.JsonFields.ACCESS_TOKEN_FIELD);
+        final String refreshToken = authResponse.getString(Constants.JsonFields.REFRESH_TOKEN_FIELD);
+        final int expiresIn = authResponse.getInt(Constants.JsonFields.EXPIRES_IN_FIELD);
+        final long expiresAt = authResponse.getLong(Constants.JsonFields.EXPIRES_AT_FIELD);
 
-            // Create the user profile and settings
-            createUserProfile(user, userId, accessToken);
-            createUserSettings(userId, accessToken);
-
-            return new AuthenticationToken(accessToken, refreshToken, expiresIn, expiresAt);
-        }
-        catch (IOException exception) {
-            throw new DatabaseAccessException(Constants.ErrorMessages.DB_FAILED_ACCESS, exception);
-        }
-    }
-
-    /**
-     * Creates a user profile in the database.
-     * This is called automatically during user creation.
-     * @param user the user entity containing profile information
-     * @param userId the ID of the user from auth.users
-     * @param accessToken the access token for authentication
-     * @throws IOException if there is an error communicating with the database
-     * @throws DatabaseAccessException if the profile creation fails
-     */
-    private void createUserProfile(User user, String userId,
-        String accessToken) throws IOException, DatabaseAccessException {
-        final JSONObject profileBody = new JSONObject()
-            .put(Constants.JsonFields.ID_FIELD, userId)
-            .put(Constants.JsonFields.USERNAME_FIELD, user.getName())
-            .put(Constants.JsonFields.EMAIL_FIELD, user.getEmail());
-
-        final RequestBody body = RequestBody.create(
-            profileBody.toString(),
-            MediaType.parse(Constants.Http.CONTENT_TYPE_JSON));
-
-        final Request request = new Request.Builder()
-            .url(apiUrl + Constants.Endpoints.USER_PROFILES_ENDPOINT)
-            .post(body)
-            .addHeader(Constants.Http.API_KEY_HEADER, apiKey)
-            .addHeader(Constants.Http.AUTH_HEADER, Constants.Http.BEARER_PREFIX + accessToken)
-            .addHeader(Constants.Http.CONTENT_TYPE_HEADER, Constants.Http.CONTENT_TYPE_JSON)
-            .addHeader(Constants.Http.PREFER_HEADER, Constants.Http.PREFER_MINIMAL)
-            .build();
-
-        final Response response = client.newCall(request).execute();
-        final String responseBody = response.body().string();
-
-        if (!response.isSuccessful()) {
-            throw new DatabaseAccessException(
-                String.format(Constants.ErrorMessages.DB_FAILED_CREATE_PROFILE, responseBody));
-        }
-    }
-
-    /**
-     * Creates default user settings for a new user.
-     * This is called automatically during user creation.
-     * The database table has default values for all columns except id.
-     * @param userId the ID of the user to create settings for
-     * @param accessToken the access token for authentication
-     * @throws IOException if there is an error communicating with the database
-     * @throws DatabaseAccessException if the settings creation fails
-     */
-    private void createUserSettings(String userId, String accessToken) throws IOException, DatabaseAccessException {
-        final JSONObject settingsBody = new JSONObject()
-            .put(Constants.JsonFields.ID_FIELD, userId);
-
-        final RequestBody body = RequestBody.create(
-            settingsBody.toString(),
-            MediaType.parse(Constants.Http.CONTENT_TYPE_JSON));
-
-        final Request request = new Request.Builder()
-            .url(apiUrl + Constants.Endpoints.USER_SETTINGS_ENDPOINT)
-            .post(body)
-            .addHeader(Constants.Http.API_KEY_HEADER, apiKey)
-            .addHeader(Constants.Http.AUTH_HEADER, Constants.Http.BEARER_PREFIX + accessToken)
-            .addHeader(Constants.Http.CONTENT_TYPE_HEADER, Constants.Http.CONTENT_TYPE_JSON)
-            .addHeader(Constants.Http.PREFER_HEADER, Constants.Http.PREFER_MINIMAL)
-            .build();
-
-        final Response response = client.newCall(request).execute();
-        final String responseBody = response.body().string();
-
-        if (!response.isSuccessful()) {
-            throw new DatabaseAccessException(
-                String.format(Constants.ErrorMessages.DB_FAILED_CREATE_SETTINGS, responseBody));
-        }
+        return new AuthenticationToken(accessToken, refreshToken, expiresIn, expiresAt);
     }
 
     /**
      * Creates a new auth user in Supabase.
-     * @param email the user's email
+     * The display_name in metadata is set to the user's name.
+     * @param user the user to create
      * @param password the user's password
      * @return JSONObject containing the response from Supabase auth
      * @throws DatabaseAccessException if the user creation fails
      */
-    private JSONObject createAuthUser(String email, String password) throws DatabaseAccessException {
+    private JSONObject createAuthUser(User user, String password) throws DatabaseAccessException {
+        final JSONObject metadata = new JSONObject()
+            .put("display_name", user.getName());
+
         final JSONObject authBody = new JSONObject()
-            .put(Constants.JsonFields.EMAIL_FIELD, email)
-            .put(Constants.JsonFields.PASSWORD_FIELD, password);
+            .put(Constants.JsonFields.EMAIL_FIELD, user.getEmail())
+            .put(Constants.JsonFields.PASSWORD_FIELD, password)
+            .put("data", metadata);
 
         final RequestBody body = RequestBody.create(
             authBody.toString(),
