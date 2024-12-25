@@ -1,4 +1,4 @@
-package com.pawmodoro.users.service.signup;
+package com.pawmodoro.users.entity;
 
 /**
  * Exception thrown when attempting to register with an email that is already in use.

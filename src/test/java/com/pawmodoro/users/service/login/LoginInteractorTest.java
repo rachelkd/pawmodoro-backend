@@ -16,6 +16,7 @@ import com.pawmodoro.core.DatabaseAccessException;
 import com.pawmodoro.users.entity.AuthenticatedUser;
 import com.pawmodoro.users.entity.AuthenticationToken;
 import com.pawmodoro.users.entity.CommonUserFactory;
+import com.pawmodoro.users.entity.InvalidLoginException;
 import com.pawmodoro.users.entity.User;
 import com.pawmodoro.users.entity.UserFactory;
 import com.pawmodoro.users.entity.UserNotFoundException;

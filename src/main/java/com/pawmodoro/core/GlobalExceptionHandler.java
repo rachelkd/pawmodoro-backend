@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.pawmodoro.cats.entity.CatAlreadyExistsException;
 import com.pawmodoro.cats.entity.NoCatsFoundException;
 import com.pawmodoro.cats.service.get_all_cats.InvalidGetAllCatsException;
+import com.pawmodoro.users.entity.EmailAlreadyRegisteredException;
+import com.pawmodoro.users.entity.InvalidLoginException;
+import com.pawmodoro.users.entity.InvalidLogoutException;
+import com.pawmodoro.users.entity.InvalidSignupException;
 import com.pawmodoro.users.entity.UserNotFoundException;
-import com.pawmodoro.users.service.login.InvalidLoginException;
-import com.pawmodoro.users.service.logout.InvalidLogoutException;
-import com.pawmodoro.users.service.signup.EmailAlreadyRegisteredException;
-import com.pawmodoro.users.service.signup.InvalidSignupException;
 
 /**
  * Global exception handler for the application.

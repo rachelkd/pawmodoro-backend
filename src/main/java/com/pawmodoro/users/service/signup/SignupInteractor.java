@@ -4,6 +4,8 @@ import org.springframework.stereotype.Service;
 
 import com.pawmodoro.core.DatabaseAccessException;
 import com.pawmodoro.users.entity.AuthenticationToken;
+import com.pawmodoro.users.entity.EmailAlreadyRegisteredException;
+import com.pawmodoro.users.entity.InvalidSignupException;
 import com.pawmodoro.users.entity.User;
 import com.pawmodoro.users.entity.UserFactory;
 import com.pawmodoro.users.service.signup.interface_adapter.SignupResponseDto;

@@ -2,6 +2,8 @@ package com.pawmodoro.users.service.logout;
 
 import org.springframework.stereotype.Service;
 
+import com.pawmodoro.users.entity.InvalidLogoutException;
+
 /**
  * The Logout Interactor implements the business logic for user logout.
  */

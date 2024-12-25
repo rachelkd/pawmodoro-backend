@@ -1,6 +1,7 @@
 package com.pawmodoro.users.service.signup;
 
 import com.pawmodoro.core.DatabaseAccessException;
+import com.pawmodoro.users.entity.InvalidSignupException;
 import com.pawmodoro.users.service.signup.interface_adapter.SignupResponseDto;
 
 /**

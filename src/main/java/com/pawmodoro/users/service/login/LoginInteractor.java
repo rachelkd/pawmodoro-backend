@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.pawmodoro.core.DatabaseAccessException;
 import com.pawmodoro.users.entity.AuthenticatedUser;
+import com.pawmodoro.users.entity.InvalidLoginException;
 import com.pawmodoro.users.entity.User;
 import com.pawmodoro.users.entity.UserNotFoundException;
 import com.pawmodoro.users.service.login.interface_adapter.LoginResponseDto;

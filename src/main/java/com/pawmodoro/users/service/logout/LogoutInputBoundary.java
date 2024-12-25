@@ -1,5 +1,7 @@
 package com.pawmodoro.users.service.logout;
 
+import com.pawmodoro.users.entity.InvalidLogoutException;
+
 /**
  * Input boundary for the logout use case.
  */

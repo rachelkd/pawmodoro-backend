@@ -1,4 +1,4 @@
-package com.pawmodoro.users.service.logout;
+package com.pawmodoro.users.entity;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
