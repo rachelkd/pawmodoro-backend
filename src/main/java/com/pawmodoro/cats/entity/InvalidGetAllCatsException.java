@@ -1,4 +1,4 @@
-package com.pawmodoro.cats.service.get_all_cats;
+package com.pawmodoro.cats.entity;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

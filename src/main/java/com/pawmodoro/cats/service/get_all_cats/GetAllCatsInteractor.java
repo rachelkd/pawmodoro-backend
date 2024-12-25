@@ -5,6 +5,7 @@ import java.util.Collection;
 import org.springframework.stereotype.Service;
 
 import com.pawmodoro.cats.entity.Cat;
+import com.pawmodoro.cats.entity.InvalidGetAllCatsException;
 import com.pawmodoro.cats.service.get_all_cats.interface_adapter.GetAllCatsResponseDto;
 import com.pawmodoro.core.DatabaseAccessException;
 
