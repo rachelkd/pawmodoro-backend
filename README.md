@@ -1,10 +1,33 @@
 # Pawmodoro Backend API
 
-This is the backend service for the Pawmodoro application, a gamified study timer with virtual pet care mechanics.
+This is the backend service for the Pawmodoro application.
+
+## Table of Contents
+
+- [Tech Stack](#tech-stack)
+- [API Endpoints](#api-endpoints)
+    - [Authentication](#authentication)
+        - [Login](#login)
+        - [Signup](#signup)
+        - [Logout](#logout)
+        - [Refresh Token](#refresh-token)
+    - [User Settings](#user-settings)
+        - [Get User Settings](#get-user-settings)
+        - [Update User Settings](#update-user-settings)
+    - [Cats](#cats)
+        - [Get All Cats](#get-all-cats)
+        - [Create Cat](#create-cat)
+        - [Delete Cat](#delete-cat)
+        - [Update Cat Happiness](#update-cat-happiness)
+        - [Update Cat Hunger](#update-cat-hunger)
+- [Authentication Details](#authentication)
+- [Database](#database)
+- [Running Locally](#running-locally)
 
 ## Tech Stack
+
 - Java 21
-- Spring Boot 3.4.0
+- Spring Boot 3.4.1
 - Supabase (Database)
 
 ## API Endpoints
@@ -12,12 +35,14 @@ This is the backend service for the Pawmodoro application, a gamified study time
 ### Authentication
 
 #### Login
+
 ```http
 POST /api/users/login
 Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
     "username": "string",
@@ -26,7 +51,9 @@ Content-Type: application/json
 ```
 
 **Responses:**
+
 - `200 OK`: Login successful
+
 ```json
 {
     "accessToken": "string",
@@ -34,13 +61,17 @@ Content-Type: application/json
     "username": "string"
 }
 ```
+
 - `401 UNAUTHORIZED`: Invalid credentials
+
 ```json
 {
     "message": "Wrong password"
 }
 ```
+
 - `400 BAD_REQUEST`: Invalid input
+
 ```json
 {
     "username": "Username can only contain letters, numbers, dots, underscores, and hyphens"
@@ -48,12 +79,14 @@ Content-Type: application/json
 ```
 
 #### Signup
+
 ```http
 POST /api/users/signup
 Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
     "username": "string",
@@ -64,7 +97,9 @@ Content-Type: application/json
 ```
 
 **Responses:**
+
 - `200 OK`: Signup successful
+
 ```json
 {
     "success": true,
@@ -73,7 +108,9 @@ Content-Type: application/json
     "username": "string"
 }
 ```
+
 - `400 BAD_REQUEST`: Invalid input or user already exists
+
 ```json
 {
     "message": "Username already taken"
@@ -81,20 +118,25 @@ Content-Type: application/json
 ```
 
 #### Logout
+
 ```http
 POST /api/users/logout
 Authorization: Bearer <token>
 ```
 
 **Responses:**
+
 - `200 OK`: Logout successful
+
 ```json
 {
     "success": true,
     "message": "Successfully logged out"
 }
 ```
+
 - `401 UNAUTHORIZED`: Invalid or expired token
+
 ```json
 {
     "message": "Invalid or expired access token"
@@ -102,12 +144,14 @@ Authorization: Bearer <token>
 ```
 
 #### Refresh Token
+
 ```http
 POST /api/users/refresh
 Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
     "refreshToken": "string"
@@ -115,7 +159,9 @@ Content-Type: application/json
 ```
 
 **Responses:**
+
 - `200 OK`: Token refresh successful
+
 ```json
 {
     "accessToken": "string",
@@ -124,7 +170,9 @@ Content-Type: application/json
     "expiresAt": number
 }
 ```
+
 - `404 NOT FOUND`: Invalid refresh token
+
 ```json
 {
     "message": "Invalid Refresh Token: Refresh Token Not Found"
@@ -140,13 +188,16 @@ Content-Type: application/json
 ### User Settings
 
 #### Get User Settings
+
 ```http
 GET /api/settings/{username}
 Authorization: Bearer <token>
 ```
 
 **Responses:**
+
 - `200 OK`: Successfully retrieved settings
+
 ```json
 {
     "username": "string",
@@ -157,13 +208,17 @@ Authorization: Bearer <token>
     "autoStartFocus": boolean
 }
 ```
+
 - `401 UNAUTHORIZED`: Invalid or expired token
+
 ```json
 {
     "message": "Invalid or expired access token"
 }
 ```
+
 - `404 NOT_FOUND`: User not found
+
 ```json
 {
     "message": "User not found: username"
@@ -171,6 +226,7 @@ Authorization: Bearer <token>
 ```
 
 #### Update User Settings
+
 ```http
 PUT /api/settings/{username}
 Authorization: Bearer <token>
@@ -178,6 +234,7 @@ Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
     "focusDuration": number,
@@ -189,7 +246,9 @@ Content-Type: application/json
 ```
 
 **Responses:**
+
 - `200 OK`: Settings updated successfully
+
 ```json
 {
     "username": "string",
@@ -200,13 +259,17 @@ Content-Type: application/json
     "autoStartFocus": boolean
 }
 ```
+
 - `401 UNAUTHORIZED`: Invalid or expired token
+
 ```json
 {
     "message": "Invalid or expired access token"
 }
 ```
+
 - `404 NOT_FOUND`: User not found
+
 ```json
 {
     "message": "User not found: username"
@@ -216,13 +279,16 @@ Content-Type: application/json
 ### Cats
 
 #### Get All Cats
+
 ```http
 GET /api/cats/{username}
 Authorization: Bearer <token>
 ```
 
 **Responses:**
+
 - `200 OK`: Successfully retrieved cats
+
 ```json
 {
     "success": true,
@@ -238,13 +304,17 @@ Authorization: Bearer <token>
     "message": "Successfully retrieved cats"
 }
 ```
+
 - `400 BAD_REQUEST`: Invalid username
+
 ```json
 {
     "message": "Username cannot be null or empty"
 }
 ```
+
 - `401 UNAUTHORIZED`: Missing or invalid token
+
 ```json
 {
     "message": "Authorization token is required"
@@ -361,7 +431,131 @@ Content-Type: application/json
 }
 ```
 
-## Authentication
+#### Update Cat Happiness
+
+```http
+PUT /api/cats/{ownerUsername}/{catName}/happiness
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Request Body:**
+
+```json
+{
+    "changeAmount": number  // Required, positive or negative integer
+}
+```
+
+**Responses:**
+
+- `200 OK`: Happiness updated successfully
+
+```json
+{
+    "catName": "string",
+    "ownerUsername": "string",
+    "happinessLevel": number,
+    "hungerLevel": number,
+    "imageFileName": "string"
+}
+```
+
+- `400 BAD_REQUEST`: Invalid input
+
+```json
+{
+    "changeAmount": "Change amount is required"
+}
+```
+
+- `401 UNAUTHORIZED`: Missing or invalid token
+
+```json
+{
+    "message": "Authorization token is required"
+}
+```
+
+- `403 FORBIDDEN`: Not authorized to update this cat
+
+```json
+{
+    "message": "You are not authorized to update this cat's happiness level"
+}
+```
+
+- `404 NOT_FOUND`: Cat not found
+
+```json
+{
+    "message": "Cat not found with the name 'string' for user 'string'"
+}
+```
+
+#### Update Cat Hunger
+
+```http
+PUT /api/cats/{ownerUsername}/{catName}/hunger
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Request Body:**
+
+```json
+{
+    "changeAmount": number  // Required, positive or negative integer
+}
+```
+
+**Responses:**
+
+- `200 OK`: Hunger updated successfully
+
+```json
+{
+    "catName": "string",
+    "ownerUsername": "string",
+    "happinessLevel": number,
+    "hungerLevel": number,
+    "imageFileName": "string"
+}
+```
+
+- `400 BAD_REQUEST`: Invalid input
+
+```json
+{
+    "changeAmount": "Change amount is required"
+}
+```
+
+- `401 UNAUTHORIZED`: Missing or invalid token
+
+```json
+{
+    "message": "Authorization token is required"
+}
+```
+
+- `403 FORBIDDEN`: Not authorized to update this cat
+
+```json
+{
+    "message": "You are not authorized to update this cat's hunger level"
+}
+```
+
+- `404 NOT_FOUND`: Cat not found
+
+```json
+{
+    "message": "Cat not found with the name 'string' for user 'string'"
+}
+```
+
+## Authentication Details
 
 The API uses Supabase for authentication. All endpoints except login and signup require:
 
@@ -371,18 +565,21 @@ The API uses Supabase for authentication. All endpoints except login and signup 
 ## Database
 
 The application uses Supabase with the following main tables:
+
 - `auth.users`: Authentication data
 - `public.user_profiles`: User profile information
 - `public.cats`: Virtual pet data
 - `public.user_settings`: User preferences and settings
+- `public.user_statistics`: Logs of user activity
 
 ## Running Locally
 
 1. Ensure Java 21 is installed
 2. Set up environment variables:
-   - `SUPABASE_URL`
-   - `SUPABASE_ANON_KEY`
+    - `SUPABASE_URL`
+    - `SUPABASE_ANON_KEY`
 3. Run the application:
+
 ```bash
 ./mvnw spring-boot:run
 ```
