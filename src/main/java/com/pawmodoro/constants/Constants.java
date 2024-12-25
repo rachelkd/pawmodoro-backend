@@ -113,6 +113,15 @@ public final class Constants {
         public static final String DB_FAILED_CHECK_CAT_EXISTS = "Failed to check cat existence: %s";
         public static final String DB_DUPLICATE_CAT_NAME = "A cat with this name already exists for this user";
 
+        // Cat update errors
+        public static final String CAT_UPDATE_UNAUTHORIZED = "You are not authorized to update this cat";
+        public static final String CAT_NOT_FOUND = "Cat not found with the name %s for user %s";
+        public static final String CAT_UPDATE_NO_DATA = "No data returned after updating cat %s for user %s";
+        public static final String CAT_UPDATE_PARSE_ERROR = "Failed to parse update response for cat %s: %s";
+        public static final String CAT_UPDATE_FAILED = "Failed to update cat: %s";
+        public static final String CAT_CREATE_FAILED = "Failed to create cat: %s";
+        public static final String CAT_CREATE_UNAUTHORIZED = "You are not authorized to create a cat for user: %s";
+
         private ErrorMessages() {
             // Prevent instantiation
         }

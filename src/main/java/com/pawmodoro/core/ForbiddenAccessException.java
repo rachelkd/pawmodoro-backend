@@ -5,7 +5,7 @@ package com.pawmodoro.core;
  * This is different from AuthenticationException in that the user is authenticated (has a valid token)
  * but lacks the authorization to perform the specific action.
  */
-public class ForbiddenAccessException extends RuntimeException {
+public class ForbiddenAccessException extends DatabaseAccessException {
     public ForbiddenAccessException(String message) {
         super(message);
     }
