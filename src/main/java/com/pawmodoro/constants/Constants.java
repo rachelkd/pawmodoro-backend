@@ -143,4 +143,14 @@ public final class Constants {
             // Prevent instantiation
         }
     }
+
+    /**
+     * Constants for cat stats.
+     */
+    public static final class CatStats {
+        private CatStats() {}
+
+        /** Percentage by which to decrease cat stats when skipping a session (10%). */
+        public static final double SKIP_PENALTY_PERCENTAGE = 0.1;
+    }
 }

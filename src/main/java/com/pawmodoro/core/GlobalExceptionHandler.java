@@ -3,6 +3,8 @@ package com.pawmodoro.core;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -25,6 +27,7 @@ import com.pawmodoro.users.entity.UserNotFoundException;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
      * Standard error response structure for consistent error handling.
@@ -180,6 +183,8 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public Map<String, String> handleUnexpectedException(Exception exception) {
+        logger.error("Unexpected error: {}", exception.getMessage());
+        logger.error("Stack trace:", exception);
         return createErrorResponse("An unexpected error occurred. Please try again later.");
     }
 }
