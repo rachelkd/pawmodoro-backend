@@ -43,7 +43,7 @@ public class DecreaseCatStatsOnSkipInteractor implements DecreaseCatStatsOnSkipI
         if (cats.isEmpty()) {
             outputData = new DecreaseCatStatsOnSkipOutputData(
                 null,
-                null,
+                ownerUsername,
                 0,
                 0,
                 null,
