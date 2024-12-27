@@ -21,8 +21,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.pawmodoro.cats.entity.Cat;
+import com.pawmodoro.cats.interface_adapter.CatDto;
 import com.pawmodoro.cats.service.decrease_cat_stats_on_skip.interface_adapter.DecreaseCatStatsOnSkipResponseDto;
-import com.pawmodoro.cats.service.decrease_cat_stats_on_skip.interface_adapter.DecreaseCatStatsOnSkipResponseDto.CatDto;
 import com.pawmodoro.constants.Constants;
 import com.pawmodoro.core.DatabaseAccessException;
 
@@ -108,7 +108,7 @@ class DecreaseCatStatsOnSkipInteractorTest {
 
         // Assert
         assertFalse(result.isDeleted());
-        assertEquals(CAT_NAME, result.updatedCat().catName());
+        assertEquals(CAT_NAME, result.updatedCat().name());
         assertEquals(USERNAME, result.updatedCat().ownerUsername());
         assertEquals(90, result.updatedCat().happinessLevel());
         assertEquals(90, result.updatedCat().hungerLevel());

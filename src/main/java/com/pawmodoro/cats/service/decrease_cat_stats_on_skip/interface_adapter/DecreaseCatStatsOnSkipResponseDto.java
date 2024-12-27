@@ -1,5 +1,7 @@
 package com.pawmodoro.cats.service.decrease_cat_stats_on_skip.interface_adapter;
 
+import com.pawmodoro.cats.interface_adapter.CatDto;
+
 /**
  * Data Transfer Object for the decrease cat stats on skip response.
  * Contains the updated cat's information and deletion status.
@@ -12,18 +14,4 @@ public record DecreaseCatStatsOnSkipResponseDto(
     boolean isDeleted,
     String message) {
 
-    /**
-     * Data Transfer Object for cat information.
-     * @param catName the name of the cat
-     * @param ownerUsername the username of the cat's owner
-     * @param happinessLevel the happiness level
-     * @param hungerLevel the hunger level
-     * @param imageFileName the name of the image file
-     */
-    public record CatDto(
-        String catName,
-        String ownerUsername,
-        int happinessLevel,
-        int hungerLevel,
-        String imageFileName) {}
 }
