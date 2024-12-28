@@ -55,6 +55,8 @@ public final class Constants {
         public static final String HAPPINESS_LEVEL = "happiness_level";
         public static final String HUNGER_LEVEL = "hunger_level";
         public static final String IMAGE_FILE_NAME = "image_file_name";
+        public static final String CAT_NAME_LOWER = "cat_name_lower";
+        public static final String OWNER_USERNAME_LOWER = "owner_username_lower";
 
         // Settings-related fields
         public static final String FOCUS_DURATION = "focus_duration";
@@ -152,5 +154,8 @@ public final class Constants {
 
         /** Percentage by which to decrease cat stats when skipping a session (10%). */
         public static final double SKIP_PENALTY_PERCENTAGE = 0.1;
+
+        /** Percentage by which to increase cat stats after a study session (5%). */
+        public static final double STUDY_SESSION_HAPPINESS_INCREASE = 0.05;
     }
 }

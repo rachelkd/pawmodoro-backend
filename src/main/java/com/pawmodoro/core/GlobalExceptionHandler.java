@@ -117,6 +117,8 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(DatabaseAccessException.class)
     public Map<String, String> handleDatabaseAccessException(DatabaseAccessException exception) {
+        logger.error("Database access error: {}", exception.getMessage());
+        logger.error("Stack trace:", exception);
         return createErrorResponse(exception.getMessage());
     }
 
