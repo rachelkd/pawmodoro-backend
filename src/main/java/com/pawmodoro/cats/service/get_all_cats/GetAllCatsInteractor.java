@@ -1,6 +1,6 @@
 package com.pawmodoro.cats.service.get_all_cats;
 
-import java.util.Collection;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
@@ -33,7 +33,7 @@ public class GetAllCatsInteractor implements GetAllCatsInputBoundary {
             throw new InvalidGetAllCatsException("Username cannot be null or empty");
         }
 
-        final Collection<Cat> cats = catDataAccessObject.getCatsByOwner(getAllCatsInputData.getOwnerUsername());
+        final List<Cat> cats = catDataAccessObject.getCatsByOwner(getAllCatsInputData.getOwnerUsername());
         final GetAllCatsOutputData outputData = new GetAllCatsOutputData(cats, true, null);
         return getAllCatsPresenter.prepareResponse(outputData);
     }

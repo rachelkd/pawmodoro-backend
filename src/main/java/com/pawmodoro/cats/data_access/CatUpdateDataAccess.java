@@ -1,7 +1,6 @@
 package com.pawmodoro.cats.data_access;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.ToIntFunction;
@@ -100,7 +99,7 @@ public class CatUpdateDataAccess extends AbstractCatDataAccess implements
     }
 
     @Override
-    public Collection<Cat> getCatsByOwner(String ownerUsername) throws DatabaseAccessException {
+    public List<Cat> getCatsByOwner(String ownerUsername) throws DatabaseAccessException {
         return catRetrieval.getCatsByOwner(ownerUsername);
     }
 

@@ -12,7 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.pawmodoro.cats.entity.Cat;
 import com.pawmodoro.cats.entity.InvalidGetAllCatsException;
+import com.pawmodoro.cats.interface_adapter.CatDto;
 import com.pawmodoro.cats.service.get_all_cats.interface_adapter.GetAllCatsResponseDto;
 import com.pawmodoro.core.AuthenticationException;
 import com.pawmodoro.core.DatabaseAccessException;
@@ -52,12 +53,14 @@ class GetAllCatsInteractorTest {
     @Test
     void executeWhenCatsExistReturnsSuccessResponse() throws DatabaseAccessException {
         // Arrange
-        final Collection<Cat> cats = new ArrayList<>();
+        final List<Cat> cats = new ArrayList<>();
         cats.add(mockCat);
 
         final GetAllCatsInputData inputData = new GetAllCatsInputData(TEST_USERNAME);
-        final GetAllCatsResponseDto expectedResponseDto =
-            new GetAllCatsResponseDto(true, cats, "Successfully retrieved cats");
+        final GetAllCatsResponseDto expectedResponseDto = new GetAllCatsResponseDto(
+            true,
+            List.of(new CatDto("TestCat", TEST_USERNAME, 100, 100, "cat-1.png")),
+            "Successfully retrieved cats");
 
         when(catDataAccessObject.getCatsByOwner(TEST_USERNAME))
             .thenReturn(cats);
@@ -70,7 +73,7 @@ class GetAllCatsInteractorTest {
         // Assert
         assertNotNull(actualResponse);
         assertTrue(actualResponse.success());
-        assertEquals(cats, actualResponse.cats());
+        assertEquals(1, actualResponse.cats().size());
         assertEquals("Successfully retrieved cats", actualResponse.message());
 
         verify(catDataAccessObject).getCatsByOwner(TEST_USERNAME);
@@ -80,10 +83,12 @@ class GetAllCatsInteractorTest {
     @Test
     void executeWhenNoCatsExistReturnsEmptySuccessResponse() throws DatabaseAccessException {
         // Arrange
-        final Collection<Cat> emptyCats = new ArrayList<>();
+        final List<Cat> emptyCats = new ArrayList<>();
         final GetAllCatsInputData inputData = new GetAllCatsInputData(TEST_USERNAME);
-        final GetAllCatsResponseDto expectedResponseDto =
-            new GetAllCatsResponseDto(true, emptyCats, "Successfully retrieved cats");
+        final GetAllCatsResponseDto expectedResponseDto = new GetAllCatsResponseDto(
+            true,
+            List.of(),
+            "Successfully retrieved cats");
 
         when(catDataAccessObject.getCatsByOwner(TEST_USERNAME))
             .thenReturn(emptyCats);

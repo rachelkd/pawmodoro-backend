@@ -2,7 +2,7 @@ package com.pawmodoro.cats.data_access;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -36,9 +36,9 @@ public class CatRetrievalDataAccess extends AbstractCatDataAccess implements Get
     }
 
     @Override
-    public Collection<Cat> getCatsByOwner(String ownerUsername) throws DatabaseAccessException {
+    public List<Cat> getCatsByOwner(String ownerUsername) throws DatabaseAccessException {
         final String authToken = getAndValidateAuthToken();
-        final Collection<Cat> cats = new ArrayList<>();
+        final List<Cat> cats = new ArrayList<>();
 
         final Request supabaseRequest = new Request.Builder()
             .url(getApiUrl() + Constants.Endpoints.CATS_ENDPOINT + Constants.Http.QUERY_START

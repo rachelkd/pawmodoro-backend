@@ -7,7 +7,8 @@ import com.pawmodoro.cats.service.update_cats_after_study.interface_adapter.Upda
 import com.pawmodoro.constants.Constants;
 import com.pawmodoro.core.DatabaseAccessException;
 
-import java.util.Collection;
+import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -32,7 +33,7 @@ public class UpdateCatsAfterStudyInteractor implements UpdateCatsAfterStudyInput
         String username = catDataAccess.getUsernameFromToken(input.getToken());
 
         // Get all cats for the user
-        Collection<Cat> cats = catDataAccess.getCatsByOwner(username);
+        List<Cat> cats = catDataAccess.getCatsByOwner(username);
 
         // Calculate new happiness levels for all cats after increase
         Map<Cat, Integer> updates = cats.stream()
@@ -41,7 +42,10 @@ public class UpdateCatsAfterStudyInteractor implements UpdateCatsAfterStudyInput
                 cat -> Math.clamp(
                     Math.round(cat.getHappinessLevel() * (1 + Constants.CatStats.STUDY_SESSION_HAPPINESS_INCREASE)),
                     0,
-                    100)));
+                    100),
+                (v1, v2) -> v1, // In case of duplicates, keep first
+                LinkedHashMap::new // Use LinkedHashMap to preserve order
+            ));
 
         // Update all cats in a single transaction
         CatUpdateResult updateResult = catDataAccess.updateCatsHappiness(updates);
