@@ -150,12 +150,26 @@ public final class Constants {
      * Constants for cat stats.
      */
     public static final class CatStats {
-        private CatStats() {}
+        /** Base percentage increase for happiness after a study session (5%). */
+        public static final double BASE_HAPPINESS_PERCENTAGE = 0.05;
+
+        /** Additional percentage for cats with low happiness (below threshold) (10%). */
+        public static final double LOW_HAPPINESS_BONUS_PERCENTAGE = 0.10;
+
+        /** Threshold below which cats get bonus happiness increase. */
+        public static final int LOW_HAPPINESS_THRESHOLD = 30;
+
+        /** Maximum happiness level a cat can have. */
+        public static final int MAX_HAPPINESS_LEVEL = 100;
+
+        /** Minimum happiness increase per study session. */
+        public static final int MIN_HAPPINESS_INCREASE = 2;
 
         /** Percentage by which to decrease cat stats when skipping a session (10%). */
         public static final double SKIP_PENALTY_PERCENTAGE = 0.1;
 
-        /** Percentage by which to increase cat stats after a study session (5%). */
-        public static final double STUDY_SESSION_HAPPINESS_INCREASE = 0.05;
+        private CatStats() {
+            // Prevent instantiation
+        }
     }
 }
