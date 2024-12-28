@@ -1,7 +1,7 @@
 package com.pawmodoro.cats.service.update_cats_after_study;
 
 /**
- * Input data for updating cats after study completion
+ * Input data for updating cats after study completion.
  */
 public class UpdateCatsAfterStudyInputData {
     private final String token;

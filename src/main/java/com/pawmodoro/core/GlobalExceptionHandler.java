@@ -27,7 +27,7 @@ import com.pawmodoro.users.entity.UserNotFoundException;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
      * Standard error response structure for consistent error handling.
@@ -117,8 +117,8 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(DatabaseAccessException.class)
     public Map<String, String> handleDatabaseAccessException(DatabaseAccessException exception) {
-        logger.error("Database access error: {}", exception.getMessage());
-        logger.error("Stack trace:", exception);
+        LOGGER.error("Database access error: {}", exception.getMessage());
+        LOGGER.error("Stack trace:", exception);
         return createErrorResponse(exception.getMessage());
     }
 
@@ -185,8 +185,8 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public Map<String, String> handleUnexpectedException(Exception exception) {
-        logger.error("Unexpected error: {}", exception.getMessage());
-        logger.error("Stack trace:", exception);
+        LOGGER.error("Unexpected error: {}", exception.getMessage());
+        LOGGER.error("Stack trace:", exception);
         return createErrorResponse("An unexpected error occurred. Please try again later.");
     }
 }

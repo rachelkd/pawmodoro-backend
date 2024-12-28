@@ -1,15 +1,13 @@
 package com.pawmodoro.cats.data_access;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.ToIntFunction;
-import java.util.ArrayList;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
@@ -43,7 +41,6 @@ public class CatUpdateDataAccess extends AbstractCatDataAccess implements
     DecreaseCatStatsOnSkipDataAccessInterface,
     UpdateCatsAfterStudyDataAccessInterface {
 
-    private static final Logger logger = LoggerFactory.getLogger(CatUpdateDataAccess.class);
     private static final MediaType JSON = MediaType.parse(Constants.Http.CONTENT_TYPE_JSON);
     private final CatFactory catFactory;
     private final CatRetrievalDataAccess catRetrieval;
@@ -89,7 +86,9 @@ public class CatUpdateDataAccess extends AbstractCatDataAccess implements
 
             // Response should contain exactly one row due to RLS and database triggers
             final JSONArray profiles = new JSONArray(responseBody);
-            assert profiles.length() == 1 : "Expected exactly one user profile due to RLS and database triggers";
+            if (profiles.length() != 1) {
+                throw new DatabaseAccessException("Expected exactly one user profile due to RLS and database triggers");
+            }
             return profiles.getJSONObject(0).getString(Constants.JsonFields.USERNAME_FIELD);
         }
         catch (IOException exception) {
@@ -188,7 +187,8 @@ public class CatUpdateDataAccess extends AbstractCatDataAccess implements
             }
 
             // Parse the response and create a new cat entity
-            final JSONObject catJson = new JSONArray(responseBody).getJSONObject(0);
+            final JSONArray responseArray = new JSONArray(responseBody);
+            final JSONObject catJson = responseArray.getJSONObject(0);
             return catFactory.create(
                 catJson.getString(Constants.JsonFields.CAT_NAME),
                 catJson.getString(Constants.JsonFields.OWNER_USERNAME),
@@ -205,7 +205,7 @@ public class CatUpdateDataAccess extends AbstractCatDataAccess implements
     private void updateSingleCat(Cat cat, int newHappiness, String authToken,
         List<Cat> updatedCats, List<String> failures) throws AuthenticationException, ForbiddenAccessException {
         try {
-            String filterQuery = String.format(
+            final String filterQuery = String.format(
                 "%s?%s=eq.%s&%s=eq.%s",
                 Constants.Endpoints.CATS_ENDPOINT,
                 Constants.JsonFields.CAT_NAME_LOWER,
@@ -213,11 +213,11 @@ public class CatUpdateDataAccess extends AbstractCatDataAccess implements
                 Constants.JsonFields.OWNER_USERNAME_LOWER,
                 cat.getOwnerUsername().toLowerCase());
 
-            String queryUrl = getApiUrl() + filterQuery;
-            JSONObject catUpdate = new JSONObject()
+            final String queryUrl = getApiUrl() + filterQuery;
+            final JSONObject catUpdate = new JSONObject()
                 .put(Constants.JsonFields.HAPPINESS_LEVEL, newHappiness);
 
-            Request request = new Request.Builder()
+            final Request request = new Request.Builder()
                 .url(queryUrl)
                 .patch(RequestBody.create(catUpdate.toString(), JSON))
                 .addHeader(Constants.Http.API_KEY_HEADER, getApiKey())
@@ -225,15 +225,15 @@ public class CatUpdateDataAccess extends AbstractCatDataAccess implements
                 .addHeader(Constants.Http.PREFER_HEADER, Constants.Http.PREFER_REPRESENTATION)
                 .build();
 
-            Response response = getClient().newCall(request).execute();
-            String responseBody = response.body().string();
+            final Response response = getClient().newCall(request).execute();
+            final String responseBody = response.body().string();
 
             if (!response.isSuccessful()) {
                 handleUpdateError(response.code(), responseBody, cat, failures);
-                return;
             }
-
-            handleSuccessResponse(responseBody, cat, updatedCats, failures);
+            else {
+                handleSuccessResponse(responseBody, cat, updatedCats, failures);
+            }
         }
         catch (IOException exception) {
             failures.add(String.format("Failed to update cat %s: %s",
@@ -254,9 +254,9 @@ public class CatUpdateDataAccess extends AbstractCatDataAccess implements
 
     private void handleSuccessResponse(String responseBody, Cat cat,
         List<Cat> updatedCats, List<String> failures) {
-        JSONArray responseArray = new JSONArray(responseBody);
-        if (responseArray.length() > 0) {
-            JSONObject catJson = responseArray.getJSONObject(0);
+        try {
+            final JSONArray responseArray = new JSONArray(responseBody);
+            final JSONObject catJson = responseArray.getJSONObject(0);
             updatedCats.add(catFactory.create(
                 catJson.getString(Constants.JsonFields.CAT_NAME),
                 catJson.getString(Constants.JsonFields.OWNER_USERNAME),
@@ -264,16 +264,43 @@ public class CatUpdateDataAccess extends AbstractCatDataAccess implements
                 catJson.getInt(Constants.JsonFields.HUNGER_LEVEL),
                 catJson.getString(Constants.JsonFields.IMAGE_FILE_NAME)));
         }
-        else {
-            failures.add(String.format("No data returned for cat %s", cat.getName()));
+        catch (org.json.JSONException exception) {
+            failures.add(String.format(Constants.ErrorMessages.CAT_UPDATE_PARSE_ERROR,
+                cat.getName(), exception.getMessage()));
         }
     }
 
+    @Override
+    public CatUpdateResult updateCatsHappiness(Map<Cat, Integer> catUpdates) throws DatabaseAccessException {
+        final String authToken = getAndValidateAuthToken();
+        final List<Cat> updatedCats = new ArrayList<>();
+        final List<String> failures = new ArrayList<>();
+
+        for (Map.Entry<Cat, Integer> entry : catUpdates.entrySet()) {
+            try {
+                updateSingleCat(entry.getKey(), entry.getValue(), authToken, updatedCats, failures);
+            }
+            catch (AuthenticationException | ForbiddenAccessException exception) {
+                throw new DatabaseAccessException(exception.getMessage());
+            }
+        }
+
+        return new CatUpdateResult(updatedCats, failures);
+    }
+
+    /**
+     * Result class for cat update operations.
+     * Contains lists of successfully updated cats and any failure messages.
+     * @throws IllegalArgumentException if either parameter is null
+     */
     public static class CatUpdateResult {
         private final List<Cat> updatedCats;
         private final List<String> failures;
 
         public CatUpdateResult(List<Cat> updatedCats, List<String> failures) {
+            if (updatedCats == null || failures == null) {
+                throw new IllegalArgumentException("Neither updatedCats nor failures can be null");
+            }
             this.updatedCats = updatedCats;
             this.failures = failures;
         }
@@ -285,27 +312,5 @@ public class CatUpdateDataAccess extends AbstractCatDataAccess implements
         public List<String> getFailures() {
             return failures;
         }
-    }
-
-    @Override
-    public CatUpdateResult updateCatsHappiness(Map<Cat, Integer> catUpdates) throws DatabaseAccessException {
-        final String authToken = getAndValidateAuthToken();
-        List<Cat> updatedCats = new ArrayList<>();
-        List<String> failures = new ArrayList<>();
-
-        for (Map.Entry<Cat, Integer> entry : catUpdates.entrySet()) {
-            updateSingleCat(entry.getKey(), entry.getValue(), authToken, updatedCats, failures);
-        }
-
-        if (updatedCats.isEmpty() && !failures.isEmpty()) {
-            throw new DatabaseAccessException(
-                String.format("Failed to update any cats. Errors: %s", String.join(", ", failures)));
-        }
-
-        if (!failures.isEmpty() && logger.isWarnEnabled()) {
-            logger.warn("Some cats failed to update: {}", String.join(", ", failures));
-        }
-
-        return new CatUpdateResult(updatedCats, failures);
     }
 }

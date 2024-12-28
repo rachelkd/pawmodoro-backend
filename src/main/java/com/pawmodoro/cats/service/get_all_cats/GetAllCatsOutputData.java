@@ -1,6 +1,7 @@
 package com.pawmodoro.cats.service.get_all_cats;
 
 import java.util.List;
+
 import com.pawmodoro.cats.entity.Cat;
 
 /**

@@ -1,6 +1,7 @@
 package com.pawmodoro.cats.service.get_all_cats.interface_adapter;
 
 import java.util.List;
+
 import com.pawmodoro.cats.interface_adapter.CatDto;
 
 /**
@@ -13,4 +14,6 @@ import com.pawmodoro.cats.interface_adapter.CatDto;
 public record GetAllCatsResponseDto(
     boolean success,
     List<CatDto> cats,
-    String message) {}
+    String message) {
+
+}

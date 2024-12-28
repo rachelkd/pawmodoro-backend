@@ -18,7 +18,7 @@ public class GetAllCatsPresenter implements GetAllCatsOutputBoundary {
 
     @Override
     public GetAllCatsResponseDto prepareResponse(GetAllCatsOutputData outputData) {
-        List<CatDto> catDtos = outputData.getCats().stream()
+        final List<CatDto> catDtos = outputData.getCats().stream()
             .map(this::mapCatToDto)
             .toList();
 

@@ -1,7 +1,7 @@
 package com.pawmodoro.cats.interface_adapter;
 
 /**
- * DTO for cat data
+ * DTO for cat data.
  * @param name The name of the cat
  * @param ownerUsername The username of the owner of the cat
  * @param happinessLevel The current happiness level of the cat
