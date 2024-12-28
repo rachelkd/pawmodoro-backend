@@ -1,10 +1,11 @@
 package com.pawmodoro.cats.service.update_cats_after_study;
 
 import java.util.List;
+
 import com.pawmodoro.cats.entity.Cat;
 
 /**
- * Output data for the update cats after study use case
+ * Output data for the update cats after study use case.
  * Contains the list of successfully updated cats and any failure messages
  */
 public class UpdateCatsAfterStudyOutputData {
