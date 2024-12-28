@@ -20,6 +20,8 @@ This is the backend service for the Pawmodoro application.
         - [Delete Cat](#delete-cat)
         - [Update Cat Happiness](#update-cat-happiness)
         - [Update Cat Hunger](#update-cat-hunger)
+        - [Update Cats After Study](#update-cats-after-study)
+        - [Decrease Cat Stats On Skip](#decrease-cat-stats-on-skip)
 - [Authentication Details](#authentication)
 - [Database](#database)
 - [Running Locally](#running-locally)
@@ -552,6 +554,99 @@ Content-Type: application/json
 ```json
 {
     "message": "Cat not found with the name 'string' for user 'string'"
+}
+```
+
+#### Update Cats After Study
+
+```http
+POST /api/cats/update-after-study
+Authorization: Bearer <token>
+```
+
+**Responses:**
+
+- `200 OK`: Successfully updated cats
+
+```json
+{
+    "updatedCats": [
+        {
+            "name": "string",
+            "ownerUsername": "string",
+            "happinessLevel": number,
+            "hungerLevel": number,
+            "imageFileName": "string"
+        }
+    ],
+    "failures": [
+        "string"
+    ]
+}
+```
+
+- `401 UNAUTHORIZED`: Missing or invalid token
+
+```json
+{
+    "message": "Authorization token is required"
+}
+```
+
+- `500 INTERNAL_SERVER_ERROR`: Database error
+
+```json
+{
+    "message": "Failed to update cats"
+}
+```
+
+#### Decrease Cat Stats On Skip
+
+```http
+POST /api/cats/decrease-stats-on-skip
+Authorization: Bearer <token>
+```
+
+**Responses:**
+
+- `200 OK`: Successfully decreased cat stats
+
+```json
+{
+    "updatedCat": {
+        "name": "string",
+        "ownerUsername": "string",
+        "happinessLevel": number,
+        "hungerLevel": number,
+        "imageFileName": "string"
+    },
+    "isDeleted": boolean,
+    "message": "string"
+}
+```
+
+- `401 UNAUTHORIZED`: Missing or invalid token
+
+```json
+{
+    "message": "Authorization token is required"
+}
+```
+
+- `404 NOT_FOUND`: No cats found for user
+
+```json
+{
+    "message": "No cats found for user"
+}
+```
+
+- `500 INTERNAL_SERVER_ERROR`: Database error
+
+```json
+{
+    "message": "Failed to decrease cat stats"
 }
 ```
 
