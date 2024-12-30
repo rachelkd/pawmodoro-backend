@@ -15,12 +15,18 @@ public class DecreaseCatStatsOnSkipPresenter implements DecreaseCatStatsOnSkipOu
 
     @Override
     public DecreaseCatStatsOnSkipResponseDto prepareResponse(DecreaseCatStatsOnSkipOutputData outputData) {
-        final CatDto catDto = !outputData.isDeleted() ? new CatDto(
-            outputData.getCatName(),
-            outputData.getOwnerUsername(),
-            outputData.getHappinessLevel(),
-            outputData.getHungerLevel(),
-            outputData.getImageFileName()) : null;
+        final CatDto catDto;
+        if (!outputData.isDeleted()) {
+            catDto = new CatDto(
+                outputData.getCatName(),
+                outputData.getOwnerUsername(),
+                outputData.getHappinessLevel(),
+                outputData.getHungerLevel(),
+                outputData.getImageFileName());
+        }
+        else {
+            catDto = null;
+        }
 
         return new DecreaseCatStatsOnSkipResponseDto(
             catDto,
