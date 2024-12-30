@@ -60,10 +60,11 @@ public class CatUpdateDataAccess extends AbstractCatDataAccess implements
 
     @Override
     public String getUsernameFromToken(String token) throws DatabaseAccessException {
-        // The token contains the user's ID, and Supabase RLS will automatically filter
-        // to show only the current user's profile
+        // The token contains the user's ID, we need to filter by it
         final Request request = new Request.Builder()
             .url(getApiUrl() + Constants.Endpoints.USER_PROFILES_ENDPOINT + Constants.Http.QUERY_START
+                + Constants.JsonFields.ID_FIELD + Constants.Http.QUERY_EQUALS + getAuthUserId(token)
+                + Constants.Http.AND_OPERATOR
                 + Constants.Http.SELECT_PARAM + Constants.JsonFields.USERNAME_FIELD)
             .get()
             .addHeader(Constants.Http.API_KEY_HEADER, getApiKey())
@@ -84,12 +85,38 @@ public class CatUpdateDataAccess extends AbstractCatDataAccess implements
                 }
             }
 
-            // Response should contain exactly one row due to RLS and database triggers
+            // Response should contain exactly one row since we're filtering by ID
             final JSONArray profiles = new JSONArray(responseBody);
             if (profiles.length() != 1) {
-                throw new DatabaseAccessException("Expected exactly one user profile due to RLS and database triggers");
+                throw new DatabaseAccessException("Expected exactly one user profile when filtering by ID");
             }
             return profiles.getJSONObject(0).getString(Constants.JsonFields.USERNAME_FIELD);
+        }
+        catch (IOException exception) {
+            throw new DatabaseAccessException(
+                String.format(Constants.ErrorMessages.DB_FAILED_ACCESS, exception.getMessage()));
+        }
+    }
+
+    private String getAuthUserId(String token) throws DatabaseAccessException {
+        final Request request = new Request.Builder()
+            .url(getApiUrl() + Constants.Endpoints.AUTH_USERS_ENDPOINT)
+            .get()
+            .addHeader(Constants.Http.API_KEY_HEADER, getApiKey())
+            .addHeader(Constants.Http.AUTH_HEADER, Constants.Http.BEARER_PREFIX + token)
+            .build();
+
+        try {
+            final Response response = getClient().newCall(request).execute();
+            final String responseBody = response.body().string();
+
+            if (!response.isSuccessful()) {
+                throw new DatabaseAccessException(
+                    String.format(Constants.ErrorMessages.DB_FAILED_ACCESS, responseBody));
+            }
+
+            final JSONObject user = new JSONObject(responseBody);
+            return user.getString(Constants.JsonFields.ID_FIELD);
         }
         catch (IOException exception) {
             throw new DatabaseAccessException(

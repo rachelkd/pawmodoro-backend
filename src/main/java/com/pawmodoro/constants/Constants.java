@@ -83,6 +83,7 @@ public final class Constants {
         public static final String USER_SETTINGS_ENDPOINT = "/rest/v1/user_settings";
         public static final String AUTH_USERS_ENDPOINT = "/auth/v1/user";
         public static final String CATS_ENDPOINT = "/rest/v1/cats";
+        public static final String LOGIN_LOOKUP_ENDPOINT = "/rest/v1/login_lookup";
 
         private Endpoints() {
             // Prevent instantiation

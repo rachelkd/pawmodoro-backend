@@ -257,7 +257,7 @@ public class DbUserDataAccessObject implements SignupUserDataAccessInterface,
     @Override
     public User get(String username) throws DatabaseAccessException, UserNotFoundException {
         final Request request = new Request.Builder()
-            .url(apiUrl + Constants.Endpoints.USER_PROFILES_ENDPOINT + Constants.Http.QUERY_START
+            .url(apiUrl + Constants.Endpoints.LOGIN_LOOKUP_ENDPOINT + Constants.Http.QUERY_START
                 + Constants.JsonFields.USERNAME_FIELD + Constants.Http.QUERY_EQUALS + username)
             .get()
             .addHeader(Constants.Http.API_KEY_HEADER, apiKey)
