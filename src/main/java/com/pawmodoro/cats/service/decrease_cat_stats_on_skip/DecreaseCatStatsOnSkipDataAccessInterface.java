@@ -1,6 +1,6 @@
 package com.pawmodoro.cats.service.decrease_cat_stats_on_skip;
 
-import java.util.Collection;
+import java.util.List;
 
 import com.pawmodoro.cats.entity.Cat;
 import com.pawmodoro.core.AuthenticationException;
@@ -23,10 +23,10 @@ public interface DecreaseCatStatsOnSkipDataAccessInterface {
     /**
      * Gets all cats owned by a user.
      * @param ownerUsername the username of the owner
-     * @return a collection of cats owned by the user
+     * @return a list of cats owned by the user
      * @throws DatabaseAccessException if there is an error accessing the database
      */
-    Collection<Cat> getCatsByOwner(String ownerUsername) throws DatabaseAccessException;
+    List<Cat> getCatsByOwner(String ownerUsername) throws DatabaseAccessException;
 
     /**
      * Updates a cat's hunger level.

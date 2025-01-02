@@ -1,6 +1,6 @@
 package com.pawmodoro.cats.service.decrease_cat_stats_on_skip;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Random;
 
 import org.springframework.stereotype.Service;
@@ -37,7 +37,7 @@ public class DecreaseCatStatsOnSkipInteractor implements DecreaseCatStatsOnSkipI
         final String ownerUsername = dataAccess.getUsernameFromToken(inputData.getToken());
 
         // Get all cats owned by the user
-        final Collection<Cat> cats = dataAccess.getCatsByOwner(ownerUsername);
+        final List<Cat> cats = dataAccess.getCatsByOwner(ownerUsername);
 
         // Update no cats if user has no cats
         if (cats.isEmpty()) {
