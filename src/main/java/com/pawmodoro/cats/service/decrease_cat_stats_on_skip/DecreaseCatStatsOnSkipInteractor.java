@@ -49,47 +49,47 @@ public class DecreaseCatStatsOnSkipInteractor implements DecreaseCatStatsOnSkipI
                 null,
                 false,
                 "No cats found to update");
-            return outputBoundary.prepareResponse(outputData);
         }
+        else {
+            // Select a random cat
+            final Cat selectedCat = cats.stream().skip(random.nextInt(cats.size())).findFirst().get();
 
-        // Select a random cat
-        final Cat selectedCat = cats.stream().skip(random.nextInt(cats.size())).findFirst().get();
+            // Calculate new stats
+            final int happinessDecrease =
+                (int) (selectedCat.getHappinessLevel() * Constants.CatStats.SKIP_PENALTY_PERCENTAGE);
+            final int hungerDecrease =
+                (int) (selectedCat.getHungerLevel() * Constants.CatStats.SKIP_PENALTY_PERCENTAGE);
 
-        // Calculate new stats
-        final int happinessDecrease =
-            (int) (selectedCat.getHappinessLevel() * Constants.CatStats.SKIP_PENALTY_PERCENTAGE);
-        final int hungerDecrease =
-            (int) (selectedCat.getHungerLevel() * Constants.CatStats.SKIP_PENALTY_PERCENTAGE);
+            // Update happiness first
+            Cat updatedCat = dataAccess.updateHappiness(selectedCat.getName(), ownerUsername, -happinessDecrease);
 
-        // Update happiness first
-        Cat updatedCat = dataAccess.updateHappiness(selectedCat.getName(), ownerUsername, -happinessDecrease);
+            // Then update hunger
+            updatedCat = dataAccess.updateHunger(updatedCat.getName(), ownerUsername, -hungerDecrease);
 
-        // Then update hunger
-        updatedCat = dataAccess.updateHunger(updatedCat.getName(), ownerUsername, -hungerDecrease);
-
-        // Check if cat should be deleted
-        if (updatedCat.getHappinessLevel() <= 0 || updatedCat.getHungerLevel() <= 0) {
-            dataAccess.deleteCat(updatedCat.getName(), ownerUsername);
-            outputData = new DecreaseCatStatsOnSkipOutputData(
-                updatedCat.getName(),
-                ownerUsername,
-                0,
-                0,
-                updatedCat.getImageFileName(),
-                true,
-                String.format("Cat %s ran away due to neglect!", updatedCat.getName()));
-            return outputBoundary.prepareResponse(outputData);
+            // Check if cat should be deleted
+            if (updatedCat.getHappinessLevel() <= 0 || updatedCat.getHungerLevel() <= 0) {
+                dataAccess.deleteCat(updatedCat.getName(), ownerUsername);
+                outputData = new DecreaseCatStatsOnSkipOutputData(
+                    updatedCat.getName(),
+                    ownerUsername,
+                    0,
+                    0,
+                    updatedCat.getImageFileName(),
+                    true,
+                    String.format("Cat %s ran away due to neglect!", updatedCat.getName()));
+            }
+            else {
+                outputData = new DecreaseCatStatsOnSkipOutputData(
+                    updatedCat.getName(),
+                    ownerUsername,
+                    updatedCat.getHappinessLevel(),
+                    updatedCat.getHungerLevel(),
+                    updatedCat.getImageFileName(),
+                    false,
+                    String.format("Cat %s's stats were decreased", updatedCat.getName()));
+            }
         }
-
-        outputData = new DecreaseCatStatsOnSkipOutputData(
-            updatedCat.getName(),
-            ownerUsername,
-            updatedCat.getHappinessLevel(),
-            updatedCat.getHungerLevel(),
-            updatedCat.getImageFileName(),
-            false,
-            String.format("Cat %s's stats were decreased", updatedCat.getName()));
-
         return outputBoundary.prepareResponse(outputData);
     }
+
 }
