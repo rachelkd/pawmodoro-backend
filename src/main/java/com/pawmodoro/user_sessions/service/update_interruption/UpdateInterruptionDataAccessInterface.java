@@ -18,10 +18,10 @@ public interface UpdateInterruptionDataAccessInterface {
     UserSession getSession(UUID sessionId) throws DatabaseAccessException;
 
     /**
-     * Updates a session in the database.
+     * Updates the interruption count for a session.
      * @param session The session to update
      * @return The updated session
      * @throws DatabaseAccessException if there's an error accessing the database
      */
-    UserSession updateSession(UserSession session) throws DatabaseAccessException;
+    UserSession updateInterruptionCount(UserSession session) throws DatabaseAccessException;
 }

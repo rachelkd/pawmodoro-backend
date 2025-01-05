@@ -18,6 +18,7 @@ import com.pawmodoro.core.AuthenticationException;
 import com.pawmodoro.core.DatabaseAccessException;
 import com.pawmodoro.core.ForbiddenAccessException;
 import com.pawmodoro.user_sessions.entity.UserSession;
+import com.pawmodoro.user_sessions.service.complete_session.CompleteSessionDataAccessInterface;
 import com.pawmodoro.user_sessions.service.create_session.CreateSessionDataAccessInterface;
 import com.pawmodoro.user_sessions.service.update_interruption.UpdateInterruptionDataAccessInterface;
 import okhttp3.Request;
@@ -30,7 +31,8 @@ import okhttp3.ResponseBody;
  */
 @Repository
 public class UserSessionDataAccess extends AbstractDataAccess
-    implements CreateSessionDataAccessInterface, UpdateInterruptionDataAccessInterface {
+    implements CreateSessionDataAccessInterface, UpdateInterruptionDataAccessInterface,
+    CompleteSessionDataAccessInterface {
 
     private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
     private final ObjectMapper objectMapper;
@@ -80,12 +82,12 @@ public class UserSessionDataAccess extends AbstractDataAccess
     }
 
     @Override
-    public UserSession updateSession(UserSession session) throws DatabaseAccessException {
+    public UserSession updateInterruptionCount(UserSession session) throws DatabaseAccessException {
         try {
             // Get auth token
             final String authToken = getAndValidateAuthToken();
 
-            // Create minimal JSON with only fields that can be updated
+            // Create minimal JSON with only interruption count
             final ObjectNode jsonNode = objectMapper.createObjectNode()
                 .put(Constants.JsonFields.INTERRUPTION_COUNT, session.getInterruptionCount());
 
@@ -93,7 +95,8 @@ public class UserSessionDataAccess extends AbstractDataAccess
 
             // Build request
             final Request request = new Request.Builder()
-                .url(getApiUrl() + Constants.Endpoints.USER_SESSIONS_ENDPOINT + "?id=eq." + session.getId())
+                .url(getApiUrl() + Constants.Endpoints.USER_SESSIONS_ENDPOINT + Constants.Http.QUERY_START
+                    + Constants.JsonFields.ID_FIELD + Constants.Http.QUERY_EQUALS + session.getId())
                 .addHeader(Constants.Http.API_KEY_HEADER, getApiKey())
                 .addHeader(Constants.Http.CONTENT_TYPE_HEADER, Constants.Http.CONTENT_TYPE_JSON)
                 .addHeader(Constants.Http.PREFER_HEADER, Constants.Http.PREFER_REPRESENTATION)
@@ -112,12 +115,51 @@ public class UserSessionDataAccess extends AbstractDataAccess
             }
         }
         catch (IOException exception) {
-            throw new DatabaseAccessException("Failed to update session: " + exception.getMessage());
+            throw new DatabaseAccessException("Failed to update session interruption count: " + exception.getMessage());
         }
     }
 
     @Override
-    public UserSession create(UserSession userStatistics) throws DatabaseAccessException {
+    public UserSession updateCompletion(UserSession session) throws DatabaseAccessException {
+        try {
+            // Get auth token
+            final String authToken = getAndValidateAuthToken();
+
+            // Create minimal JSON with completion status and end time
+            final ObjectNode jsonNode = objectMapper.createObjectNode()
+                .put(Constants.JsonFields.WAS_COMPLETED, session.isCompleted())
+                .put(Constants.JsonFields.SESSION_END_TIME, session.getSessionEndTime().format(ISO_FORMATTER));
+
+            final RequestBody body = RequestBody.create(jsonNode.toString(), JSON);
+
+            // Build request
+            final Request request = new Request.Builder()
+                .url(getApiUrl() + Constants.Endpoints.USER_SESSIONS_ENDPOINT + Constants.Http.QUERY_START
+                    + Constants.JsonFields.ID_FIELD + Constants.Http.QUERY_EQUALS + session.getId())
+                .addHeader(Constants.Http.API_KEY_HEADER, getApiKey())
+                .addHeader(Constants.Http.CONTENT_TYPE_HEADER, Constants.Http.CONTENT_TYPE_JSON)
+                .addHeader(Constants.Http.PREFER_HEADER, Constants.Http.PREFER_REPRESENTATION)
+                .addHeader(Constants.Http.AUTH_HEADER, authToken)
+                .patch(body)
+                .build();
+
+            // Execute request
+            try (Response response = getClient().newCall(request).execute()) {
+                checkResponse(response);
+
+                // Parse response and return the updated session
+                final String responseBody = response.body().string();
+                final UserSession[] sessions = objectMapper.readValue(responseBody, UserSession[].class);
+                return sessions[0];
+            }
+        }
+        catch (IOException exception) {
+            throw new DatabaseAccessException("Failed to update session completion: " + exception.getMessage());
+        }
+    }
+
+    @Override
+    public UserSession create(UserSession userSession) throws DatabaseAccessException {
         try {
             // Get auth token and user ID
             final String authToken = getAndValidateAuthToken();
@@ -126,11 +168,11 @@ public class UserSessionDataAccess extends AbstractDataAccess
             // Create minimal JSON with only required fields
             final ObjectNode jsonNode = objectMapper.createObjectNode()
                 .put(Constants.JsonFields.USER_ID, userId.toString())
-                .put(Constants.JsonFields.SESSION_TYPE, userStatistics.getSessionType().getValue())
-                .put(Constants.JsonFields.DURATION_MINUTES, userStatistics.getDurationMinutes())
+                .put(Constants.JsonFields.SESSION_TYPE, userSession.getSessionType().getValue())
+                .put(Constants.JsonFields.DURATION_MINUTES, userSession.getDurationMinutes())
                 .put(Constants.JsonFields.SESSION_START_TIME,
-                    userStatistics.getSessionStartTime().format(ISO_FORMATTER))
-                .put(Constants.JsonFields.SESSION_END_TIME, userStatistics.getSessionEndTime().format(ISO_FORMATTER));
+                    userSession.getSessionStartTime().format(ISO_FORMATTER))
+                .put(Constants.JsonFields.SESSION_END_TIME, userSession.getSessionEndTime().format(ISO_FORMATTER));
 
             final RequestBody body = RequestBody.create(jsonNode.toString(), JSON);
 
@@ -144,18 +186,14 @@ public class UserSessionDataAccess extends AbstractDataAccess
                 .post(body)
                 .build();
 
-            // Execute request - Supabase will:
-            // 1. Verify user_id matches token
-            // 2. Generate UUID for id field
-            // 3. Set default values for other fields
-            // 4. Apply RLS policies
+            // Execute request
             try (Response response = getClient().newCall(request).execute()) {
                 checkResponse(response);
 
-                // Parse response and return the created entity
+                // Parse response and return the created session
                 final String responseBody = response.body().string();
-                final UserSession[] stats = objectMapper.readValue(responseBody, UserSession[].class);
-                return stats[0];
+                final UserSession[] sessions = objectMapper.readValue(responseBody, UserSession[].class);
+                return sessions[0];
             }
         }
         catch (IOException exception) {

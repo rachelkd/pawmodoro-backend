@@ -30,7 +30,7 @@ public class UpdateInterruptionInteractor implements UpdateInterruptionInputBoun
         session.recordInterruption();
 
         // Update in database
-        final UserSession updatedSession = dataAccess.updateSession(session);
+        final UserSession updatedSession = dataAccess.updateInterruptionCount(session);
 
         // Prepare output data
         final UpdateInterruptionOutputData outputData = UpdateInterruptionOutputData.builder()
