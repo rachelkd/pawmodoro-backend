@@ -69,7 +69,7 @@ class CreateSessionInteractorTest {
             .sessionStartTime(now)
             .sessionEndTime(now)
             .durationMinutes(durationMinutes)
-            .wasCompleted(false)
+            .completed(false)
             .interruptionCount(0)
             .build();
 
@@ -89,12 +89,12 @@ class CreateSessionInteractorTest {
     private void assertResponseMatches(CreateSessionResponseDto response, UUID sessionId, UUID userId,
         SessionType sessionType, int durationMinutes) {
         assertNotNull(response);
-        assertEquals(sessionId, response.getId());
-        assertEquals(userId, response.getUserId());
-        assertEquals(sessionType.getValue(), response.getSessionType());
-        assertEquals(durationMinutes, response.getDurationMinutes());
-        assertEquals(false, response.isWasCompleted());
-        assertEquals(0, response.getInterruptionCount());
+        assertEquals(sessionId, response.id());
+        assertEquals(userId, response.userId());
+        assertEquals(sessionType.getValue(), response.sessionType());
+        assertEquals(durationMinutes, response.durationMinutes());
+        assertEquals(false, response.completed());
+        assertEquals(0, response.interruptionCount());
     }
 
     private void verifyOutputData(UUID sessionId, UUID userId, SessionType sessionType, ZonedDateTime timestamp,
@@ -109,7 +109,7 @@ class CreateSessionInteractorTest {
         assertEquals(timestamp, capturedOutputData.getSessionStartTime());
         assertEquals(timestamp, capturedOutputData.getSessionEndTime());
         assertEquals(durationMinutes, capturedOutputData.getDurationMinutes());
-        assertEquals(false, capturedOutputData.isWasCompleted());
+        assertEquals(false, capturedOutputData.isCompleted());
         assertEquals(0, capturedOutputData.getInterruptionCount());
     }
 

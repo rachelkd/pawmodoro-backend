@@ -20,7 +20,7 @@ public class CreateSessionPresenter implements CreateSessionOutputBoundary {
             .sessionStartTime(outputData.getSessionStartTime())
             .sessionEndTime(outputData.getSessionEndTime())
             .durationMinutes(outputData.getDurationMinutes())
-            .wasCompleted(outputData.isWasCompleted())
+            .completed(outputData.isCompleted())
             .interruptionCount(outputData.getInterruptionCount())
             .build();
     }

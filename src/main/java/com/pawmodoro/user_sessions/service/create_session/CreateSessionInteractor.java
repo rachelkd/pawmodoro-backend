@@ -39,7 +39,7 @@ public class CreateSessionInteractor implements CreateSessionInputBoundary {
             .sessionStartTime(savedSession.getSessionStartTime())
             .sessionEndTime(savedSession.getSessionEndTime())
             .durationMinutes(savedSession.getDurationMinutes())
-            .wasCompleted(savedSession.getWasCompleted())
+            .completed(savedSession.isCompleted())
             .interruptionCount(savedSession.getInterruptionCount())
             .build();
 

@@ -5,11 +5,16 @@ import java.util.UUID;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  * Entity representing a user's study session.
  * Maps to the public.user_sessions table in the database.
  */
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserSession {
     private UUID id;
 
@@ -29,19 +34,13 @@ public class UserSession {
     @Min(1)
     private Integer durationMinutes;
 
-    @NotNull
-    private Boolean wasCompleted = false;
+    private boolean completed = false;
 
     @NotNull
     @Min(0)
     private Integer interruptionCount = 0;
 
     private ZonedDateTime createdAt;
-
-    // Default constructor
-    protected UserSession() {
-        // Empty constructor
-    }
 
     /**
      * Creates a new UserSession instance.
@@ -54,44 +53,6 @@ public class UserSession {
         this.durationMinutes = durationMinutes;
         this.sessionStartTime = ZonedDateTime.now();
         this.sessionEndTime = this.sessionStartTime;
-    }
-
-    // Getters
-
-    public UUID getId() {
-        return id;
-    }
-
-    public UUID getUserId() {
-        return userId;
-    }
-
-    public ZonedDateTime getSessionStartTime() {
-        return sessionStartTime;
-    }
-
-    public ZonedDateTime getSessionEndTime() {
-        return sessionEndTime;
-    }
-
-    public SessionType getSessionType() {
-        return sessionType;
-    }
-
-    public Integer getDurationMinutes() {
-        return durationMinutes;
-    }
-
-    public Boolean getWasCompleted() {
-        return wasCompleted;
-    }
-
-    public Integer getInterruptionCount() {
-        return interruptionCount;
-    }
-
-    public ZonedDateTime getCreatedAt() {
-        return createdAt;
     }
 
     // Business methods
@@ -107,7 +68,7 @@ public class UserSession {
      * Completes the session successfully.
      */
     public void complete() {
-        this.wasCompleted = true;
+        this.completed = true;
         this.sessionEndTime = ZonedDateTime.now();
     }
 
@@ -115,7 +76,7 @@ public class UserSession {
      * Cancels the session.
      */
     public void cancel() {
-        this.wasCompleted = false;
+        this.completed = false;
         this.sessionEndTime = ZonedDateTime.now();
     }
 }
