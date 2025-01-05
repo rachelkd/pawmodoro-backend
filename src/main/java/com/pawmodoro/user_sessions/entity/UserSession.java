@@ -78,7 +78,7 @@ public class UserSession {
     }
 
     /**
-     * Cancels the session.
+     * Cancels the session, setting the end time to now and completed to false.
      */
     public void cancel() {
         this.completed = false;

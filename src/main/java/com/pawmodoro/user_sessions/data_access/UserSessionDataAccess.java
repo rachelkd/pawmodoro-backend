@@ -18,6 +18,7 @@ import com.pawmodoro.core.AuthenticationException;
 import com.pawmodoro.core.DatabaseAccessException;
 import com.pawmodoro.core.ForbiddenAccessException;
 import com.pawmodoro.user_sessions.entity.UserSession;
+import com.pawmodoro.user_sessions.service.cancel_session.CancelSessionDataAccessInterface;
 import com.pawmodoro.user_sessions.service.complete_session.CompleteSessionDataAccessInterface;
 import com.pawmodoro.user_sessions.service.create_session.CreateSessionDataAccessInterface;
 import com.pawmodoro.user_sessions.service.update_interruption.UpdateInterruptionDataAccessInterface;
@@ -32,7 +33,7 @@ import okhttp3.ResponseBody;
 @Repository
 public class UserSessionDataAccess extends AbstractDataAccess
     implements CreateSessionDataAccessInterface, UpdateInterruptionDataAccessInterface,
-    CompleteSessionDataAccessInterface {
+    CompleteSessionDataAccessInterface, CancelSessionDataAccessInterface {
 
     private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
     private final ObjectMapper objectMapper;
@@ -199,6 +200,45 @@ public class UserSessionDataAccess extends AbstractDataAccess
         catch (IOException exception) {
             throw new DatabaseAccessException(
                 String.format(Constants.ErrorMessages.STATS_CREATE_FAILED, exception.getMessage()));
+        }
+    }
+
+    @Override
+    public UserSession updateCancellation(UserSession session) throws DatabaseAccessException {
+        try {
+            // Get auth token
+            final String authToken = getAndValidateAuthToken();
+
+            // Create minimal JSON with completion status and end time
+            final ObjectNode jsonNode = objectMapper.createObjectNode()
+                .put(Constants.JsonFields.WAS_COMPLETED, session.isCompleted())
+                .put(Constants.JsonFields.SESSION_END_TIME, session.getSessionEndTime().format(ISO_FORMATTER));
+
+            final RequestBody body = RequestBody.create(jsonNode.toString(), JSON);
+
+            // Build request
+            final Request request = new Request.Builder()
+                .url(getApiUrl() + Constants.Endpoints.USER_SESSIONS_ENDPOINT + Constants.Http.QUERY_START
+                    + Constants.JsonFields.ID_FIELD + Constants.Http.QUERY_EQUALS + session.getId())
+                .addHeader(Constants.Http.API_KEY_HEADER, getApiKey())
+                .addHeader(Constants.Http.CONTENT_TYPE_HEADER, Constants.Http.CONTENT_TYPE_JSON)
+                .addHeader(Constants.Http.PREFER_HEADER, Constants.Http.PREFER_REPRESENTATION)
+                .addHeader(Constants.Http.AUTH_HEADER, authToken)
+                .patch(body)
+                .build();
+
+            // Execute request
+            try (Response response = getClient().newCall(request).execute()) {
+                checkResponse(response);
+
+                // Parse response and return the updated session
+                final String responseBody = response.body().string();
+                final UserSession[] sessions = objectMapper.readValue(responseBody, UserSession[].class);
+                return sessions[0];
+            }
+        }
+        catch (IOException exception) {
+            throw new DatabaseAccessException("Failed to update session cancellation: " + exception.getMessage());
         }
     }
 
