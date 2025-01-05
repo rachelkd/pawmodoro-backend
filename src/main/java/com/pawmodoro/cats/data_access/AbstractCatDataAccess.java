@@ -1,51 +1,18 @@
 package com.pawmodoro.cats.data_access;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.pawmodoro.constants.Constants;
-import com.pawmodoro.core.AuthenticationException;
-import jakarta.servlet.http.HttpServletRequest;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
+import com.pawmodoro.core.AbstractDataAccess;
 
 /**
  * Abstract base class for cat-related data access operations.
- * Provides common functionality for authentication and HTTP client operations.
+ * Provides common functionality for cat-specific operations.
  */
-public abstract class AbstractCatDataAccess {
-    protected static final MediaType JSON = MediaType.get(Constants.Http.CONTENT_TYPE_JSON);
-    private final OkHttpClient client;
-    private final String apiUrl;
-    private final String apiKey;
+public abstract class AbstractCatDataAccess extends AbstractDataAccess {
 
     protected AbstractCatDataAccess(@Value("${supabase.url}") String apiUrl, @Value("${supabase.key}") String apiKey) {
-        this.client = new OkHttpClient().newBuilder().build();
-        this.apiUrl = apiUrl;
-        this.apiKey = apiKey;
-    }
-
-    protected OkHttpClient getClient() {
-        return client;
-    }
-
-    protected String getApiUrl() {
-        return apiUrl;
-    }
-
-    protected String getApiKey() {
-        return apiKey;
-    }
-
-    protected String getAndValidateAuthToken() throws AuthenticationException {
-        final HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-            .getRequest();
-        final String authToken = request.getHeader(Constants.Http.AUTH_HEADER);
-        if (authToken == null || !authToken.startsWith(Constants.Http.BEARER_PREFIX)) {
-            throw new AuthenticationException(Constants.ErrorMessages.AUTH_TOKEN_REQUIRED);
-        }
-        return authToken;
+        super(apiUrl, apiKey);
     }
 
     protected String buildCatQueryUrl(String catName, String ownerUsername) {
