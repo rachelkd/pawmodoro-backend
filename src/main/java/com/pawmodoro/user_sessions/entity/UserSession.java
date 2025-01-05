@@ -3,6 +3,9 @@ package com.pawmodoro.user_sessions.entity;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -34,6 +37,8 @@ public class UserSession {
     @Min(1)
     private Integer durationMinutes;
 
+    @JsonProperty("completed")
+    @JsonAlias("was_completed")
     private boolean completed = false;
 
     @NotNull
