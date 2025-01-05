@@ -66,7 +66,7 @@ class UpdateInterruptionInteractorTest {
 
         // Mock data access calls
         when(dataAccess.getSession(sessionId)).thenReturn(initialSession);
-        when(dataAccess.updateSession(any(UserSession.class))).thenReturn(updatedSession);
+        when(dataAccess.updateInterruptionCount(any(UserSession.class))).thenReturn(updatedSession);
 
         final UpdateInterruptionResponseDto expectedResponse = UpdateInterruptionResponseDto.builder()
             .id(sessionId)
@@ -89,7 +89,7 @@ class UpdateInterruptionInteractorTest {
 
         // Verify interactions and output data
         verify(dataAccess).getSession(sessionId);
-        verify(dataAccess).updateSession(any(UserSession.class));
+        verify(dataAccess).updateInterruptionCount(any(UserSession.class));
         verifyOutputData(sessionId, userId, SessionType.FOCUS, now, 25, 1);
     }
 
