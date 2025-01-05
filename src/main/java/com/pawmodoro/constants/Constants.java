@@ -26,6 +26,7 @@ public final class Constants {
         public static final String SELECT_PARAM = "select=";
         public static final String LIMIT_PARAM = "limit=";
         public static final String AND_OPERATOR = "&";
+        public static final String USER_ID_ATTRIBUTE = "userId";
 
         private Http() {
             // Prevent instantiation
@@ -65,6 +66,15 @@ public final class Constants {
         public static final String AUTO_START_BREAKS = "auto_start_breaks";
         public static final String AUTO_START_FOCUS = "auto_start_focus";
 
+        // User statistics fields
+        public static final String USER_ID = "user_id";
+        public static final String SESSION_START_TIME = "session_start_time";
+        public static final String SESSION_END_TIME = "session_end_time";
+        public static final String SESSION_TYPE = "session_type";
+        public static final String DURATION_MINUTES = "duration_minutes";
+        public static final String WAS_COMPLETED = "was_completed";
+        public static final String INTERRUPTION_COUNT = "interruption_count";
+
         private JsonFields() {
             // Prevent instantiation
         }
@@ -84,6 +94,7 @@ public final class Constants {
         public static final String AUTH_USERS_ENDPOINT = "/auth/v1/user";
         public static final String CATS_ENDPOINT = "/rest/v1/cats";
         public static final String LOGIN_LOOKUP_ENDPOINT = "/rest/v1/login_lookup";
+        public static final String USER_SESSIONS_ENDPOINT = "/rest/v1/user_sessions";
 
         private Endpoints() {
             // Prevent instantiation
@@ -96,6 +107,13 @@ public final class Constants {
     public static final class ErrorMessages {
         // Format strings
         public static final String ERROR_MESSAGE_FORMAT = ": %s";
+
+        // User Statistics errors
+        public static final String STATS_CREATE_FAILED = "Failed to create session statistics: %s";
+        public static final String STATS_INVALID_DURATION = "Session duration must be greater than 0 minutes";
+        public static final String STATS_INVALID_SESSION_TYPE = "Invalid session type";
+        public static final String STATS_USER_NOT_AUTHORIZED =
+            "You are not authorized to create statistics for user: %s";
 
         // User Not Found errors
         public static final String AUTH_USER_NOT_FOUND = "User not found: %s";
@@ -124,6 +142,9 @@ public final class Constants {
         public static final String CAT_UPDATE_FAILED = "Failed to update cat: %s";
         public static final String CAT_CREATE_FAILED = "Failed to create cat: %s";
         public static final String CAT_CREATE_UNAUTHORIZED = "You are not authorized to create a cat for user: %s";
+
+        // Unauthorized access message
+        public static final String UNAUTHORIZED_ACCESS = "You are not authorized to access this resource";
 
         private ErrorMessages() {
             // Prevent instantiation

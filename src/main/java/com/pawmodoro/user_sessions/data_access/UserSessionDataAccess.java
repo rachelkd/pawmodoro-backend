@@ -1,0 +1,141 @@
+package com.pawmodoro.user_sessions.data_access;
+
+import java.io.IOException;
+import java.time.format.DateTimeFormatter;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Repository;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.pawmodoro.constants.Constants;
+import com.pawmodoro.core.AbstractDataAccess;
+import com.pawmodoro.core.AuthenticationException;
+import com.pawmodoro.core.DatabaseAccessException;
+import com.pawmodoro.core.ForbiddenAccessException;
+import com.pawmodoro.user_sessions.entity.UserSession;
+import com.pawmodoro.user_sessions.service.create_session.CreateSessionDataAccessInterface;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+
+/**
+ * Implementation of data access operations for user statistics using Supabase.
+ */
+@Repository
+public class UserSessionDataAccess extends AbstractDataAccess implements CreateSessionDataAccessInterface {
+    private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+    private final ObjectMapper objectMapper;
+
+    public UserSessionDataAccess(
+        @Value("${supabase.url}") String apiUrl,
+        @Value("${supabase.key}") String apiKey) {
+        super(apiUrl, apiKey);
+        this.objectMapper = new ObjectMapper()
+            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+            .registerModule(new JavaTimeModule());
+    }
+
+    @Override
+    public UserSession create(UserSession userStatistics) throws DatabaseAccessException {
+        try {
+            // Get auth token and user ID
+            final String authToken = getAndValidateAuthToken();
+            final UUID userId = getUserIdFromToken(authToken);
+
+            // Create minimal JSON with only required fields
+            final ObjectNode jsonNode = objectMapper.createObjectNode()
+                .put(Constants.JsonFields.USER_ID, userId.toString())
+                .put(Constants.JsonFields.SESSION_TYPE, userStatistics.getSessionType().getValue())
+                .put(Constants.JsonFields.DURATION_MINUTES, userStatistics.getDurationMinutes())
+                .put(Constants.JsonFields.SESSION_START_TIME,
+                    userStatistics.getSessionStartTime().format(ISO_FORMATTER))
+                .put(Constants.JsonFields.SESSION_END_TIME, userStatistics.getSessionEndTime().format(ISO_FORMATTER));
+
+            final RequestBody body = RequestBody.create(jsonNode.toString(), JSON);
+
+            // Build request
+            final Request request = new Request.Builder()
+                .url(getApiUrl() + Constants.Endpoints.USER_SESSIONS_ENDPOINT)
+                .addHeader(Constants.Http.API_KEY_HEADER, getApiKey())
+                .addHeader(Constants.Http.CONTENT_TYPE_HEADER, Constants.Http.CONTENT_TYPE_JSON)
+                .addHeader(Constants.Http.PREFER_HEADER, Constants.Http.PREFER_REPRESENTATION)
+                .addHeader(Constants.Http.AUTH_HEADER, authToken)
+                .post(body)
+                .build();
+
+            // Execute request - Supabase will:
+            // 1. Verify user_id matches token
+            // 2. Generate UUID for id field
+            // 3. Set default values for other fields
+            // 4. Apply RLS policies
+            try (Response response = getClient().newCall(request).execute()) {
+                checkResponse(response);
+
+                // Parse response and return the created entity
+                final String responseBody = response.body().string();
+                final UserSession[] stats = objectMapper.readValue(responseBody, UserSession[].class);
+                return stats[0];
+            }
+        }
+        catch (IOException exception) {
+            throw new DatabaseAccessException(
+                String.format(Constants.ErrorMessages.STATS_CREATE_FAILED, exception.getMessage()));
+        }
+    }
+
+    /**
+     * Checks the response status and throws appropriate exceptions.
+     * @param response The HTTP response to check
+     * @throws DatabaseAccessException if there's a general database error
+     * @throws AuthenticationException if the user is not authenticated (401)
+     * @throws ForbiddenAccessException if the user is not authorized (403)
+     * @throws IOException if there's an error reading the response
+     */
+    private void checkResponse(Response response) throws DatabaseAccessException, IOException {
+        if (!response.isSuccessful()) {
+            final String errorMessage = getErrorMessage(response);
+
+            final int statusCode = response.code();
+
+            if (statusCode == HttpStatus.UNAUTHORIZED.value()) {
+                throw new AuthenticationException(Constants.ErrorMessages.AUTH_TOKEN_INVALID);
+            }
+            else if (statusCode == HttpStatus.FORBIDDEN.value()) {
+                throw new ForbiddenAccessException(Constants.ErrorMessages.UNAUTHORIZED_ACCESS);
+            }
+            else {
+                throw new DatabaseAccessException(
+                    String.format(Constants.ErrorMessages.STATS_CREATE_FAILED, errorMessage));
+            }
+        }
+
+        if (response.body() == null) {
+            throw new DatabaseAccessException(
+                String.format(Constants.ErrorMessages.STATS_CREATE_FAILED, "Empty response body"));
+        }
+    }
+
+    /**
+     * Gets the error message from a response.
+     * @param response The HTTP response
+     * @return The error message from the response body or message
+     * @throws IOException if there's an error reading the response body
+     */
+    private String getErrorMessage(Response response) throws IOException {
+        final ResponseBody responseBody = response.body();
+        final String errorMessage;
+        if (responseBody != null) {
+            errorMessage = responseBody.string();
+        }
+        else {
+            errorMessage = response.message();
+        }
+        return errorMessage;
+    }
+}
