@@ -19,16 +19,19 @@ import com.pawmodoro.core.DatabaseAccessException;
 import com.pawmodoro.core.ForbiddenAccessException;
 import com.pawmodoro.user_sessions.entity.UserSession;
 import com.pawmodoro.user_sessions.service.create_session.CreateSessionDataAccessInterface;
+import com.pawmodoro.user_sessions.service.update_interruption.UpdateInterruptionDataAccessInterface;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 /**
- * Implementation of data access operations for user statistics using Supabase.
+ * Implementation of data access operations for user sessions using Supabase.
  */
 @Repository
-public class UserSessionDataAccess extends AbstractDataAccess implements CreateSessionDataAccessInterface {
+public class UserSessionDataAccess extends AbstractDataAccess
+    implements CreateSessionDataAccessInterface, UpdateInterruptionDataAccessInterface {
+
     private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
     private final ObjectMapper objectMapper;
 
@@ -39,6 +42,78 @@ public class UserSessionDataAccess extends AbstractDataAccess implements CreateS
         this.objectMapper = new ObjectMapper()
             .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
             .registerModule(new JavaTimeModule());
+    }
+
+    @Override
+    public UserSession getSession(UUID sessionId) throws DatabaseAccessException {
+        try {
+            // Get auth token
+            final String authToken = getAndValidateAuthToken();
+
+            // Build request
+            final Request request = new Request.Builder()
+                .url(getApiUrl() + Constants.Endpoints.USER_SESSIONS_ENDPOINT + Constants.Http.QUERY_START
+                    + Constants.JsonFields.ID_FIELD + Constants.Http.QUERY_EQUALS + sessionId)
+                .addHeader(Constants.Http.API_KEY_HEADER, getApiKey())
+                .addHeader(Constants.Http.AUTH_HEADER, authToken)
+                .get()
+                .build();
+
+            // Execute request
+            try (Response response = getClient().newCall(request).execute()) {
+                checkResponse(response);
+
+                // Parse response and return the session
+                final String responseBody = response.body().string();
+                final UserSession[] sessions = objectMapper.readValue(responseBody, UserSession[].class);
+
+                if (sessions.length == 0) {
+                    throw new DatabaseAccessException("Session not found: " + sessionId);
+                }
+
+                return sessions[0];
+            }
+        }
+        catch (IOException exception) {
+            throw new DatabaseAccessException("Failed to get session: " + exception.getMessage());
+        }
+    }
+
+    @Override
+    public UserSession updateSession(UserSession session) throws DatabaseAccessException {
+        try {
+            // Get auth token
+            final String authToken = getAndValidateAuthToken();
+
+            // Create minimal JSON with only fields that can be updated
+            final ObjectNode jsonNode = objectMapper.createObjectNode()
+                .put(Constants.JsonFields.INTERRUPTION_COUNT, session.getInterruptionCount());
+
+            final RequestBody body = RequestBody.create(jsonNode.toString(), JSON);
+
+            // Build request
+            final Request request = new Request.Builder()
+                .url(getApiUrl() + Constants.Endpoints.USER_SESSIONS_ENDPOINT + "?id=eq." + session.getId())
+                .addHeader(Constants.Http.API_KEY_HEADER, getApiKey())
+                .addHeader(Constants.Http.CONTENT_TYPE_HEADER, Constants.Http.CONTENT_TYPE_JSON)
+                .addHeader(Constants.Http.PREFER_HEADER, Constants.Http.PREFER_REPRESENTATION)
+                .addHeader(Constants.Http.AUTH_HEADER, authToken)
+                .patch(body)
+                .build();
+
+            // Execute request
+            try (Response response = getClient().newCall(request).execute()) {
+                checkResponse(response);
+
+                // Parse response and return the updated session
+                final String responseBody = response.body().string();
+                final UserSession[] sessions = objectMapper.readValue(responseBody, UserSession[].class);
+                return sessions[0];
+            }
+        }
+        catch (IOException exception) {
+            throw new DatabaseAccessException("Failed to update session: " + exception.getMessage());
+        }
     }
 
     @Override
