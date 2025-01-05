@@ -28,6 +28,10 @@ import com.pawmodoro.core.DatabaseAccessException;
 
 @ExtendWith(MockitoExtension.class)
 class DecreaseCatStatsOnSkipInteractorTest {
+    private static final String TOKEN = "test-token";
+    private static final String USERNAME = "testuser";
+    private static final String CAT_NAME = "TestCat";
+    private static final String IMAGE_FILE = "cat-1.png";
 
     @Mock
     private DecreaseCatStatsOnSkipDataAccessInterface dataAccess;
@@ -36,10 +40,6 @@ class DecreaseCatStatsOnSkipInteractorTest {
     private DecreaseCatStatsOnSkipOutputBoundary outputBoundary;
 
     private DecreaseCatStatsOnSkipInteractor interactor;
-    private static final String TOKEN = "test-token";
-    private static final String USERNAME = "testuser";
-    private static final String CAT_NAME = "TestCat";
-    private static final String IMAGE_FILE = "cat-1.png";
 
     @Captor
     private ArgumentCaptor<DecreaseCatStatsOnSkipOutputData> outputDataCaptor;
@@ -72,7 +72,7 @@ class DecreaseCatStatsOnSkipInteractorTest {
 
         // Verify output data passed to presenter
         verify(outputBoundary).prepareResponse(outputDataCaptor.capture());
-        DecreaseCatStatsOnSkipOutputData actualOutputData = outputDataCaptor.getValue();
+        final DecreaseCatStatsOnSkipOutputData actualOutputData = outputDataCaptor.getValue();
         assertNull(actualOutputData.getCatName());
         assertEquals(USERNAME, actualOutputData.getOwnerUsername());
         assertEquals(0, actualOutputData.getHappinessLevel());
@@ -121,7 +121,7 @@ class DecreaseCatStatsOnSkipInteractorTest {
 
         // Verify output data passed to presenter
         verify(outputBoundary).prepareResponse(outputDataCaptor.capture());
-        DecreaseCatStatsOnSkipOutputData actualOutputData = outputDataCaptor.getValue();
+        final DecreaseCatStatsOnSkipOutputData actualOutputData = outputDataCaptor.getValue();
         assertEquals(CAT_NAME, actualOutputData.getCatName());
         assertEquals(USERNAME, actualOutputData.getOwnerUsername());
         assertEquals(90, actualOutputData.getHappinessLevel());
@@ -167,7 +167,7 @@ class DecreaseCatStatsOnSkipInteractorTest {
 
         // Verify output data passed to presenter
         verify(outputBoundary).prepareResponse(outputDataCaptor.capture());
-        DecreaseCatStatsOnSkipOutputData actualOutputData = outputDataCaptor.getValue();
+        final DecreaseCatStatsOnSkipOutputData actualOutputData = outputDataCaptor.getValue();
         assertEquals(CAT_NAME, actualOutputData.getCatName());
         assertEquals(USERNAME, actualOutputData.getOwnerUsername());
         assertEquals(0, actualOutputData.getHappinessLevel());
