@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -102,8 +103,16 @@ public abstract class AbstractDataAccess {
                 .build();
 
             try (Response response = client.newCall(request).execute()) {
-                if (!response.isSuccessful() || response.body() == null) {
-                    throw new DatabaseAccessException(Constants.ErrorMessages.AUTH_USER_NOT_AUTHENTICATED);
+                if (response.body() == null) {
+                    throw new DatabaseAccessException(Constants.ErrorMessages.DB_FAILED_ACCESS);
+                }
+                else if (!response.isSuccessful()) {
+                    if (response.code() == HttpStatus.UNAUTHORIZED.value()) {
+                        throw new AuthenticationException(Constants.ErrorMessages.AUTH_TOKEN_INVALID);
+                    }
+                    else {
+                        throw new DatabaseAccessException(Constants.ErrorMessages.DB_FAILED_ACCESS);
+                    }
                 }
 
                 final JsonNode userInfo = objectMapper.readTree(response.body().string());
@@ -111,7 +120,7 @@ public abstract class AbstractDataAccess {
             }
         }
         catch (IOException | IllegalArgumentException exception) {
-            throw new DatabaseAccessException(Constants.ErrorMessages.AUTH_USER_NOT_AUTHENTICATED);
+            throw new DatabaseAccessException(Constants.ErrorMessages.DB_FAILED_ACCESS);
         }
     }
 }
