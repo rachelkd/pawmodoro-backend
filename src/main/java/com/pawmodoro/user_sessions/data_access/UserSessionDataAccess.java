@@ -17,6 +17,7 @@ import com.pawmodoro.core.AbstractDataAccess;
 import com.pawmodoro.core.AuthenticationException;
 import com.pawmodoro.core.DatabaseAccessException;
 import com.pawmodoro.core.ForbiddenAccessException;
+import com.pawmodoro.user_sessions.entity.NoSessionFoundException;
 import com.pawmodoro.user_sessions.entity.UserSession;
 import com.pawmodoro.user_sessions.service.cancel_session.CancelSessionDataAccessInterface;
 import com.pawmodoro.user_sessions.service.complete_session.CompleteSessionDataAccessInterface;
@@ -71,7 +72,7 @@ public class UserSessionDataAccess extends AbstractDataAccess
                 final UserSession[] sessions = objectMapper.readValue(responseBody, UserSession[].class);
 
                 if (sessions.length == 0) {
-                    throw new DatabaseAccessException("Session not found: " + sessionId);
+                    throw new NoSessionFoundException(sessionId.toString());
                 }
 
                 return sessions[0];

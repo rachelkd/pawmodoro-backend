@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.pawmodoro.cats.entity.CatAlreadyExistsException;
 import com.pawmodoro.cats.entity.InvalidGetAllCatsException;
 import com.pawmodoro.cats.entity.NoCatsFoundException;
+import com.pawmodoro.user_sessions.entity.NoSessionFoundException;
 import com.pawmodoro.users.entity.EmailAlreadyRegisteredException;
 import com.pawmodoro.users.entity.InvalidLoginException;
 import com.pawmodoro.users.entity.InvalidLogoutException;
@@ -141,6 +142,17 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     @ExceptionHandler(EmailAlreadyRegisteredException.class)
     public Map<String, String> handleEmailAlreadyRegisteredException(EmailAlreadyRegisteredException exception) {
+        return createErrorResponse(exception.getMessage());
+    }
+
+    /**
+     * Handles no session found scenarios.
+     * @param exception No session found exception
+     * @return Map containing error details
+     */
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(NoSessionFoundException.class)
+    public Map<String, String> handleNoSessionFoundException(NoSessionFoundException exception) {
         return createErrorResponse(exception.getMessage());
     }
 

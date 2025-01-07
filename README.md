@@ -22,6 +22,11 @@ This is the backend service for the Pawmodoro application.
         - [Update Cat Hunger](#update-cat-hunger)
         - [Update Cats After Study](#update-cats-after-study)
         - [Decrease Cat Stats On Skip](#decrease-cat-stats-on-skip)
+    - [User Sessions](#user-sessions)
+        - [Create Session](#create-session)
+        - [Complete Session](#complete-session)
+        - [Cancel Session](#cancel-session)
+        - [Update Session Interruption](#update-session-interruption)
 - [Authentication Details](#authentication)
 - [Database](#database)
 - [Running Locally](#running-locally)
@@ -649,6 +654,122 @@ Authorization: Bearer <token>
     "message": "Failed to decrease cat stats"
 }
 ```
+
+### User Sessions
+
+#### Create Session
+
+```http
+POST /api/sessions
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Request Body:**
+
+```json
+{
+    "sessionType": "string",  // "FOCUS", "SHORT_BREAK", or "LONG_BREAK"
+    "durationMinutes": number
+}
+```
+
+**Responses:**
+
+- `201 CREATED`: Session created successfully
+
+```json
+{
+    "id": "uuid",
+    "sessionType": "string",
+    "durationMinutes": number,
+    "startTime": "string",
+    "endTime": "string",
+    "wasCompleted": boolean,
+    "interruptionCount": number
+}
+```
+
+- `400 BAD_REQUEST`: Invalid input
+- `401 UNAUTHORIZED`: Missing or invalid token
+
+#### Complete Session
+
+```http
+PATCH /api/sessions/{id}/complete
+Authorization: Bearer <token>
+```
+
+**Responses:**
+
+- `200 OK`: Session completed successfully
+
+```json
+{
+    "id": "uuid",
+    "sessionType": "string",
+    "durationMinutes": number,
+    "startTime": "string",
+    "endTime": "string",
+    "wasCompleted": true,
+    "interruptionCount": number
+}
+```
+
+- `401 UNAUTHORIZED`: Missing or invalid token
+- `404 NOT_FOUND`: No session found with id: uuid
+
+#### Cancel Session
+
+```http
+PATCH /api/sessions/{id}/cancel
+Authorization: Bearer <token>
+```
+
+**Responses:**
+
+- `200 OK`: Session cancelled successfully
+
+```json
+{
+    "id": "uuid",
+    "sessionType": "string",
+    "durationMinutes": number,
+    "startTime": "string",
+    "endTime": "string",
+    "wasCompleted": false,
+    "interruptionCount": number
+}
+```
+
+- `401 UNAUTHORIZED`: Missing or invalid token
+- `404 NOT_FOUND`: No session found with id: uuid
+
+#### Update Session Interruption
+
+```http
+PATCH /api/sessions/{id}/interruption
+Authorization: Bearer <token>
+```
+
+**Responses:**
+
+- `200 OK`: Interruption count updated successfully
+
+```json
+{
+    "id": "uuid",
+    "sessionType": "string",
+    "durationMinutes": number,
+    "startTime": "string",
+    "endTime": "string",
+    "wasCompleted": boolean,
+    "interruptionCount": number
+}
+```
+
+- `401 UNAUTHORIZED`: Missing or invalid token
+- `404 NOT_FOUND`: No session found with id: uuid
 
 ## Authentication Details
 
