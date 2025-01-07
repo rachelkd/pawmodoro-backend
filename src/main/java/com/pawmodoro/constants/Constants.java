@@ -147,7 +147,7 @@ public final class Constants {
         public static final String UNAUTHORIZED_ACCESS = "You are not authorized to access this resource";
 
         // No session found message
-        public static final String NO_SESSION_FOUND = "No session found with id: ";
+        public static final String NO_SESSION_FOUND = "No session found with id: %s";
 
         private ErrorMessages() {
             // Prevent instantiation
