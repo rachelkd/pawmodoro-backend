@@ -786,7 +786,7 @@ The application uses Supabase with the following main tables:
 - `public.user_profiles`: User profile information
 - `public.cats`: Virtual pet data
 - `public.user_settings`: User preferences and settings
-- `public.user_statistics`: Logs of user activity
+- `public.user_sessions`: Logs of user activity
 
 ## Running Locally
 
