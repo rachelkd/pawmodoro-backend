@@ -50,16 +50,18 @@ public class UserSessionDataAccess extends AbstractDataAccess
 
     @Override
     public UserSession getSession(UUID sessionId) throws DatabaseAccessException {
-        try {
-            // Get auth token
-            final String authToken = getAndValidateAuthToken();
+        return getSession(sessionId, null);
+    }
 
+    @Override
+    public UserSession getSession(UUID sessionId, String token) throws DatabaseAccessException {
+        try {
             // Build request
             final Request request = new Request.Builder()
                 .url(getApiUrl() + Constants.Endpoints.USER_SESSIONS_ENDPOINT + Constants.Http.QUERY_START
                     + Constants.JsonFields.ID_FIELD + Constants.Http.QUERY_EQUALS + sessionId)
                 .addHeader(Constants.Http.API_KEY_HEADER, getApiKey())
-                .addHeader(Constants.Http.AUTH_HEADER, authToken)
+                .addHeader(Constants.Http.AUTH_HEADER, token)
                 .get()
                 .build();
 
@@ -205,11 +207,8 @@ public class UserSessionDataAccess extends AbstractDataAccess
     }
 
     @Override
-    public UserSession updateCancellation(UserSession session) throws DatabaseAccessException {
+    public UserSession updateCancellation(UserSession session, String token) throws DatabaseAccessException {
         try {
-            // Get auth token
-            final String authToken = getAndValidateAuthToken();
-
             // Create minimal JSON with completion status and end time
             final ObjectNode jsonNode = objectMapper.createObjectNode()
                 .put(Constants.JsonFields.WAS_COMPLETED, session.isCompleted())
@@ -224,7 +223,7 @@ public class UserSessionDataAccess extends AbstractDataAccess
                 .addHeader(Constants.Http.API_KEY_HEADER, getApiKey())
                 .addHeader(Constants.Http.CONTENT_TYPE_HEADER, Constants.Http.CONTENT_TYPE_JSON)
                 .addHeader(Constants.Http.PREFER_HEADER, Constants.Http.PREFER_REPRESENTATION)
-                .addHeader(Constants.Http.AUTH_HEADER, authToken)
+                .addHeader(Constants.Http.AUTH_HEADER, token)
                 .patch(body)
                 .build();
 

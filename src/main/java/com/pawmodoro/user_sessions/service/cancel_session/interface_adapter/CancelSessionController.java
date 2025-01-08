@@ -3,11 +3,15 @@ package com.pawmodoro.user_sessions.service.cancel_session.interface_adapter;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.pawmodoro.core.AuthenticationException;
 import com.pawmodoro.core.DatabaseAccessException;
 import com.pawmodoro.user_sessions.service.cancel_session.CancelSessionInputBoundary;
 import com.pawmodoro.user_sessions.service.cancel_session.CancelSessionInputData;
@@ -24,14 +28,35 @@ public class CancelSessionController {
     }
 
     /**
-     * Cancels a session.
+     * Cancels a session. Supports both PATCH (regular requests) and POST (beacon requests).
      * @param id The session ID
+     * @param headerAuth The authorization header
+     * @param queryAuth The authorization from query parameters (for beacon requests)
      * @return The updated session details
      * @throws DatabaseAccessException if there's an error accessing the database
+     * @throws AuthenticationException if no valid authorization is provided
      */
-    @PatchMapping("/api/sessions/{id}/cancel")
+    @RequestMapping(
+        path = "/api/sessions/{id}/cancel",
+        method = {RequestMethod.PATCH, RequestMethod.POST})
     @ResponseStatus(HttpStatus.OK)
-    public CancelSessionResponseDto cancelSession(@PathVariable UUID id) throws DatabaseAccessException {
-        return interactor.execute(new CancelSessionInputData(id));
+    public CancelSessionResponseDto cancelSession(
+        @PathVariable UUID id,
+        @RequestHeader(value = "Authorization", required = false) String headerAuth,
+        @RequestParam(value = "Authorization", required = false) String queryAuth) throws DatabaseAccessException {
+
+        final String token;
+        if (headerAuth != null) {
+            token = headerAuth;
+        }
+        else {
+            token = queryAuth;
+        }
+
+        if (token == null) {
+            throw new AuthenticationException("No authorization token provided");
+        }
+
+        return interactor.execute(new CancelSessionInputData(id, token));
     }
 }

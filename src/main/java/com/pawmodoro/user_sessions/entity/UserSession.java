@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -39,7 +38,7 @@ public class UserSession {
 
     @JsonProperty("completed")
     @JsonAlias("was_completed")
-    private boolean completed = false;
+    private boolean completed;
 
     @NotNull
     @Min(0)

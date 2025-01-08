@@ -25,13 +25,13 @@ public class CancelSessionInteractor implements CancelSessionInputBoundary {
     @Override
     public CancelSessionResponseDto execute(CancelSessionInputData input) throws DatabaseAccessException {
         // Get current session
-        final UserSession session = dataAccess.getSession(input.sessionId());
+        final UserSession session = dataAccess.getSession(input.sessionId(), input.token());
 
         // Cancel session (business logic in entity)
         session.cancel();
 
         // Update in database
-        final UserSession updatedSession = dataAccess.updateCancellation(session);
+        final UserSession updatedSession = dataAccess.updateCancellation(session, input.token());
 
         // Prepare output data
         final CancelSessionOutputData outputData = CancelSessionOutputData.builder()

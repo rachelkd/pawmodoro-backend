@@ -4,7 +4,6 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import com.pawmodoro.user_sessions.entity.SessionType;
-
 import lombok.Builder;
 import lombok.Getter;
 

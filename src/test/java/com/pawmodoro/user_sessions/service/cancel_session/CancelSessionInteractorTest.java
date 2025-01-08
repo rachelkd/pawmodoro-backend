@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,6 +30,8 @@ import com.pawmodoro.user_sessions.service.cancel_session.interface_adapter.Canc
  */
 @ExtendWith(MockitoExtension.class)
 class CancelSessionInteractorTest {
+    private static final String TEST_TOKEN = "test-token";
+
     @Mock
     private CancelSessionDataAccessInterface dataAccess;
 
@@ -48,7 +51,7 @@ class CancelSessionInteractorTest {
         final UUID sessionId = UUID.randomUUID();
         final UUID userId = UUID.randomUUID();
         final ZonedDateTime startTime = ZonedDateTime.now();
-        final CancelSessionInputData input = new CancelSessionInputData(sessionId);
+        final CancelSessionInputData input = new CancelSessionInputData(sessionId, TEST_TOKEN);
 
         // Create initial session
         final UserSession initialSession = new UserSession(SessionType.FOCUS, 25);
@@ -58,8 +61,8 @@ class CancelSessionInteractorTest {
         setPrivateField(initialSession, "sessionEndTime", startTime);
 
         // Mock data access calls
-        when(dataAccess.getSession(sessionId)).thenReturn(initialSession);
-        when(dataAccess.updateCancellation(any(UserSession.class))).thenAnswer(invocation -> {
+        when(dataAccess.getSession(sessionId, TEST_TOKEN)).thenReturn(initialSession);
+        when(dataAccess.updateCancellation(any(UserSession.class), eq(TEST_TOKEN))).thenAnswer(invocation -> {
             return invocation.getArgument(0);
         });
 
@@ -80,8 +83,8 @@ class CancelSessionInteractorTest {
         interactor.execute(input);
 
         // Verify interactions and output data
-        verify(dataAccess).getSession(sessionId);
-        verify(dataAccess).updateCancellation(any(UserSession.class));
+        verify(dataAccess).getSession(sessionId, TEST_TOKEN);
+        verify(dataAccess).updateCancellation(any(UserSession.class), eq(TEST_TOKEN));
         verifyOutputData(sessionId, userId, SessionType.FOCUS, startTime, 25, 0);
     }
 
@@ -89,8 +92,8 @@ class CancelSessionInteractorTest {
     void testExecuteWithDatabaseError() throws DatabaseAccessException {
         // Arrange
         final UUID sessionId = UUID.randomUUID();
-        final CancelSessionInputData input = new CancelSessionInputData(sessionId);
-        when(dataAccess.getSession(sessionId))
+        final CancelSessionInputData input = new CancelSessionInputData(sessionId, TEST_TOKEN);
+        when(dataAccess.getSession(sessionId, TEST_TOKEN))
             .thenThrow(new DatabaseAccessException("Database error"));
 
         // Act & Assert

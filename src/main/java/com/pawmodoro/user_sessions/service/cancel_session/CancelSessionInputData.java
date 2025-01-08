@@ -6,7 +6,8 @@ import java.util.UUID;
  * Input data for canceling a session.
  * Contains only the session ID since it's the only required information.
  * @param sessionId The ID of the session to cancel
+ * @param token The authorization token
  */
-public record CancelSessionInputData(UUID sessionId) {
+public record CancelSessionInputData(UUID sessionId, String token) {
 
 }
