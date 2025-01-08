@@ -19,6 +19,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.pawmodoro.core.AuthenticationException;
 import com.pawmodoro.core.DatabaseAccessException;
 import com.pawmodoro.user_sessions.entity.SessionType;
 import com.pawmodoro.user_sessions.entity.UserSession;
@@ -98,6 +99,19 @@ class CancelSessionInteractorTest {
 
         // Act & Assert
         assertThrows(DatabaseAccessException.class, () -> interactor.execute(input));
+    }
+
+    @Test
+    void testExecuteWithNullToken() {
+        // Arrange
+        final UUID sessionId = UUID.randomUUID();
+        final CancelSessionInputData input = new CancelSessionInputData(sessionId, null);
+
+        // Act & Assert
+        final AuthenticationException exception = assertThrows(
+            AuthenticationException.class,
+            () -> interactor.execute(input));
+        assertEquals("No authorization token provided", exception.getMessage());
     }
 
     private void verifyOutputData(UUID sessionId, UUID userId, SessionType sessionType, ZonedDateTime startTime,

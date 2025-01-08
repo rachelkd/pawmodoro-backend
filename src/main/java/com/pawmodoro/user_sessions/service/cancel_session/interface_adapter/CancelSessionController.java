@@ -45,18 +45,14 @@ public class CancelSessionController {
         @RequestHeader(value = "Authorization", required = false) String headerAuth,
         @RequestParam(value = "Authorization", required = false) String queryAuth) throws DatabaseAccessException {
 
-        final String token;
+        final String authorization;
         if (headerAuth != null) {
-            token = headerAuth;
+            authorization = headerAuth;
         }
         else {
-            token = queryAuth;
+            authorization = queryAuth;
         }
 
-        if (token == null) {
-            throw new AuthenticationException("No authorization token provided");
-        }
-
-        return interactor.execute(new CancelSessionInputData(id, token));
+        return interactor.execute(new CancelSessionInputData(id, authorization));
     }
 }

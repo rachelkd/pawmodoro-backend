@@ -2,6 +2,7 @@ package com.pawmodoro.user_sessions.service.cancel_session;
 
 import org.springframework.stereotype.Service;
 
+import com.pawmodoro.core.AuthenticationException;
 import com.pawmodoro.core.DatabaseAccessException;
 import com.pawmodoro.user_sessions.entity.UserSession;
 import com.pawmodoro.user_sessions.service.cancel_session.interface_adapter.CancelSessionOutputBoundary;
@@ -24,6 +25,10 @@ public class CancelSessionInteractor implements CancelSessionInputBoundary {
 
     @Override
     public CancelSessionResponseDto execute(CancelSessionInputData input) throws DatabaseAccessException {
+        if (input.token() == null) {
+            throw new AuthenticationException("No authorization token provided");
+        }
+
         // Get current session
         final UserSession session = dataAccess.getSession(input.sessionId(), input.token());
 
