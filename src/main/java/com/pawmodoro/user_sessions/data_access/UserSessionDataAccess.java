@@ -50,7 +50,8 @@ public class UserSessionDataAccess extends AbstractDataAccess
 
     @Override
     public UserSession getSession(UUID sessionId) throws DatabaseAccessException {
-        return getSession(sessionId, null);
+        final String authToken = getAndValidateAuthToken();
+        return getSession(sessionId, authToken);
     }
 
     @Override
