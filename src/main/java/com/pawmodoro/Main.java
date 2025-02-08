@@ -9,7 +9,7 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
  * This class initializes the Spring context and starts the embedded web server.
  * It also configures the application to run with the 'local' profile by default.
  */
-@SpringBootApplication(exclude = SecurityAutoConfiguration.class)
+@SpringBootApplication
 public class Main {
     /**
      * The main method that serves as the entry point for the application.
